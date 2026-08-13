@@ -1,4 +1,5 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { arch, cpus, platform, release, totalmem } from "node:os";
 import { join } from "node:path";
 import { Bench } from "tinybench";
@@ -28,6 +29,8 @@ const PROFILE_ITERATIONS_MAX = 100_000;
 const COMPONENT_COUNT = Number(
   process.env.STYLED_COMPONENTS_COUNT ?? STYLED_COMPONENTS_COMPONENT_COUNT,
 );
+const RESULT_FILE = process.env.STYLED_COMPONENTS_RESULT ?? "styled-components.json";
+const RESULT_FILE_PATTERN = /^[a-z0-9][a-z0-9-]*\.json$/;
 
 interface RunResult extends StyledComponentsValidation {
   name: StyledComponentsTransformerName;
@@ -86,6 +89,10 @@ interface StyledComponentsBenchResult {
     timeMs: number;
     warmupMs: number;
   };
+  reproduction: {
+    command: string;
+    resultFile: string;
+  };
   results: BenchResult[];
   runtime: string;
   system: {
@@ -106,6 +113,31 @@ interface StyledComponentsBenchResult {
 }
 
 let outputCodeUnitsLast = 0;
+
+function runtimeLabel(): string {
+  const bunVersion = (process.versions as Record<string, string | undefined>).bun;
+  return bunVersion === undefined
+    ? `Node ${process.versions.node}`
+    : `Bun ${bunVersion}`;
+}
+
+function taskArguments(...args: string[]): string[] {
+  const bunVersion = (process.versions as Record<string, string | undefined>).bun;
+  if (bunVersion === undefined) {
+    return ["--import", "tsx", "scripts/bench-styled-components.ts", ...args];
+  }
+  return ["scripts/bench-styled-components.ts", ...args];
+}
+
+function spawnTask(...args: string[]) {
+  const child = spawnSync(process.execPath, taskArguments(...args), {
+    encoding: "utf8",
+    env: process.env,
+    stdio: ["ignore", "pipe", "inherit"],
+  });
+  if (child.error !== undefined) throw child.error;
+  return child;
+}
 
 function isTransformerName(value: string): value is StyledComponentsTransformerName {
   return STYLED_COMPONENTS_TRANSFORMERS.some((name) => name === value);
@@ -295,7 +327,9 @@ function rotatedTransformers(run: number): StyledComponentsTransformerName[] {
 
 async function readPackageVersion(packageName: string): Promise<string> {
   const packagePath = join(process.cwd(), "node_modules", packageName, "package.json");
-  const packageData = (await Bun.file(packagePath).json()) as { version?: unknown };
+  const packageData = JSON.parse(await readFile(packagePath, "utf8")) as {
+    version?: unknown;
+  };
   if (typeof packageData.version !== "string") {
     throw new Error(`Package ${packageName} does not declare a version`);
   }
@@ -310,22 +344,14 @@ function profileStyledComponents(): ProfileResult[] {
   for (let run = 1; run <= BENCH_RUNS; run++) {
     for (const name of rotatedTransformers(run)) {
       console.log(`  ${name} stages (run ${run}/${BENCH_RUNS})`);
-      const processResult = Bun.spawnSync({
-        cmd: [
-          process.execPath,
-          "scripts/bench-styled-components.ts",
-          "--profile-task",
-          name,
-        ],
-        stderr: "inherit",
-        stdout: "pipe",
-      });
-      if (processResult.exitCode !== 0) {
+      const processResult = spawnTask("--profile-task", name);
+      if (processResult.status !== 0) {
         throw new Error(
-          `${name} profile run ${run} failed with exit code ${processResult.exitCode}`,
+          `${name} profile run ${run} failed with exit code ` +
+            `${processResult.status ?? "unknown"}`,
         );
       }
-      const output = JSON.parse(processResult.stdout.toString()) as {
+      const output = JSON.parse(processResult.stdout) as {
         ok: boolean;
         result?: ProfileRunResult;
       };
@@ -369,15 +395,14 @@ async function benchStyledComponents(): Promise<StyledComponentsBenchResult> {
   for (let run = 1; run <= BENCH_RUNS; run++) {
     for (const name of rotatedTransformers(run)) {
       console.log(`  ${name} (run ${run}/${BENCH_RUNS})`);
-      const processResult = Bun.spawnSync({
-        cmd: [process.execPath, "scripts/bench-styled-components.ts", "--task", name],
-        stderr: "inherit",
-        stdout: "pipe",
-      });
-      if (processResult.exitCode !== 0) {
-        throw new Error(`${name} run ${run} failed with exit code ${processResult.exitCode}`);
+      const processResult = spawnTask("--task", name);
+      if (processResult.status !== 0) {
+        throw new Error(
+          `${name} run ${run} failed with exit code ` +
+            `${processResult.status ?? "unknown"}`,
+        );
       }
-      const output = JSON.parse(processResult.stdout.toString()) as {
+      const output = JSON.parse(processResult.stdout) as {
         ok: boolean;
         result?: RunResult;
       };
@@ -427,8 +452,12 @@ async function benchStyledComponents(): Promise<StyledComponentsBenchResult> {
       timeMs: PROFILE_TIME,
       warmupMs: PROFILE_WARMUP,
     },
+    reproduction: {
+      command: process.env.BENCH_REPRODUCTION_COMMAND ?? "custom benchmark invocation",
+      resultFile: RESULT_FILE,
+    },
     results,
-    runtime: `Bun ${Bun.version}`,
+    runtime: runtimeLabel(),
     system: {
       cores: cpus().length,
       cpu: cpus()[0]?.model ?? "Unknown CPU",
@@ -448,6 +477,9 @@ async function benchStyledComponents(): Promise<StyledComponentsBenchResult> {
 }
 
 async function main(): Promise<void> {
+  if (!RESULT_FILE_PATTERN.test(RESULT_FILE)) {
+    throw new Error(`Invalid styled-components result filename: ${RESULT_FILE}`);
+  }
   const args = process.argv.slice(2);
   if (args[0] === "--task") {
     const name = args[1];
@@ -469,7 +501,7 @@ async function main(): Promise<void> {
   const result = await benchStyledComponents();
   await mkdir(join(process.cwd(), "result"), { recursive: true });
   await writeFile(
-    join(process.cwd(), "result", "styled-components.json"),
+    join(process.cwd(), "result", RESULT_FILE),
     JSON.stringify(result, null, 2),
   );
 }

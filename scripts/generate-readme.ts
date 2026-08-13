@@ -165,6 +165,10 @@ interface StyledComponentsFileResult {
     timeMs: number;
     warmupMs: number;
   };
+  reproduction: {
+    command: string;
+    resultFile: string;
+  };
   results: StyledComponentsTransformResult[];
   runtime: string;
   system: {
@@ -327,6 +331,168 @@ async function generateChart(entries: ParserEntry[], chartName: string): Promise
   return `charts/${chartName}.png`;
 }
 
+function styledComponentsColor(name: string): string {
+  if (name.startsWith("Babel")) return CHART_COLORS.babel!;
+  if (name.startsWith("SWC")) return CHART_COLORS.swc!;
+  return CHART_COLORS.yuku!;
+}
+
+async function generateStyledComponentsLatencyChart(
+  results: StyledComponentsTransformResult[],
+): Promise<string> {
+  const dpr = 3;
+  const chart = new ChartJSNodeCanvas({ width: 640 * dpr, height: 155 * dpr });
+  const maxTime = Math.max(...results.map((result) => result.median));
+  const configuration: ChartConfiguration = {
+    type: "bar",
+    data: {
+      labels: results.map((result) => result.name),
+      datasets: [
+        {
+          data: results.map((result) => result.median),
+          backgroundColor: results.map((result) => styledComponentsColor(result.name)),
+          borderWidth: 0,
+          barPercentage: 0.72,
+          categoryPercentage: 0.9,
+        },
+      ],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: false,
+      devicePixelRatio: 1,
+      layout: { padding: { right: 90 * dpr } },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { display: false, beginAtZero: true, max: maxTime * 1.12 },
+        y: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: { color: "#CAC1B0", font: { size: 10 * dpr } },
+        },
+      },
+    },
+    plugins: [
+      {
+        id: "styled-components-latency-labels",
+        afterDatasetsDraw(chartInstance) {
+          const context = chartInstance.ctx;
+          const metadata = chartInstance.getDatasetMeta(0);
+          for (let index = 0; index < metadata.data.length; index++) {
+            const bar = metadata.data[index]!;
+            const value = results[index]!.median;
+            context.save();
+            context.fillStyle = "#CAC1B0";
+            context.font = `${10 * dpr}px sans-serif`;
+            context.textAlign = "left";
+            context.textBaseline = "middle";
+            context.fillText(`${value.toFixed(2)} ms`, bar.x + 8 * dpr, bar.y);
+            context.restore();
+          }
+        },
+      },
+    ],
+  };
+  const outputPath = join(process.cwd(), "charts", "styled-components-latency.png");
+  await mkdir(join(process.cwd(), "charts"), { recursive: true });
+  await writeFile(outputPath, await chart.renderToBuffer(configuration));
+  return "charts/styled-components-latency.png";
+}
+
+function profileStageCategory(
+  transformer: string,
+  stage: StyledComponentsProfileStage,
+): string {
+  if (stage.name === "source encode") return "Source encode";
+  if (stage.name === "AST decode") return "AST decode";
+  if (stage.name === "AST encode") return "AST encode";
+  if (stage.name === "parse + AST transfer") return "Parse + AST transfer";
+  if (stage.name === "AST transfer + plugin + codegen") {
+    return "AST transfer + WASM plugin + codegen";
+  }
+  if (stage.name === "parse") return "Parse";
+  if (stage.name === "codegen") return "Codegen";
+  if (stage.name === "plugin transform" && transformer.startsWith("Babel")) {
+    return "Babel JS plugin";
+  }
+  return "Yuku JS plugin";
+}
+
+async function generateStyledComponentsProfileChart(
+  profiles: StyledComponentsProfileResult[],
+): Promise<string> {
+  const categories = [
+    ["Source encode", "#FFD166"],
+    ["Parse", "#4CC9F0"],
+    ["Parse + AST transfer", "#4895EF"],
+    ["AST decode", "#43AA8B"],
+    ["Babel JS plugin", "#7209B7"],
+    ["Yuku JS plugin", "#F72585"],
+    ["AST encode", "#FF9F1C"],
+    ["Codegen", "#90BE6D"],
+    ["AST transfer + WASM plugin + codegen", "#3A86FF"],
+  ] as const;
+  const dpr = 3;
+  const chart = new ChartJSNodeCanvas({ width: 760 * dpr, height: 245 * dpr });
+  const configuration: ChartConfiguration = {
+    type: "bar",
+    data: {
+      labels: profiles.map((profile) => profile.name),
+      datasets: categories.map(([category, color]) => ({
+        label: category,
+        data: profiles.map((profile) =>
+          profile.stages
+            .filter((stage) => profileStageCategory(profile.name, stage) === category)
+            .reduce((sum, stage) => sum + stage.share * 100, 0),
+        ),
+        backgroundColor: color,
+        borderWidth: 0,
+        barPercentage: 0.72,
+        categoryPercentage: 0.9,
+      })),
+    },
+    options: {
+      indexAxis: "y",
+      responsive: false,
+      devicePixelRatio: 1,
+      plugins: {
+        legend: {
+          display: true,
+          labels: {
+            boxHeight: 8 * dpr,
+            boxWidth: 8 * dpr,
+            color: "#CAC1B0",
+            font: { size: 8 * dpr },
+          },
+          position: "bottom",
+        },
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          max: 100,
+          stacked: true,
+          ticks: {
+            callback: (value) => `${value}%`,
+            color: "#CAC1B0",
+            font: { size: 8 * dpr },
+          },
+        },
+        y: {
+          stacked: true,
+          grid: { display: false },
+          border: { display: false },
+          ticks: { color: "#CAC1B0", font: { size: 9 * dpr } },
+        },
+      },
+    },
+  };
+  const outputPath = join(process.cwd(), "charts", "styled-components-stages.png");
+  await mkdir(join(process.cwd(), "charts"), { recursive: true });
+  await writeFile(outputPath, await chart.renderToBuffer(configuration));
+  return "charts/styled-components-stages.png";
+}
+
 function generateTable(entries: ParserEntry[]): string {
   const lines: string[] = [];
 
@@ -452,6 +618,8 @@ async function generateStyledComponentsTransformSection(): Promise<string> {
   const data = JSON.parse(content) as StyledComponentsFileResult;
   const results = [...data.results].sort((left, right) => left.median - right.median);
   const fastest = results[0];
+  const latencyChart = await generateStyledComponentsLatencyChart(results);
+  const profileChart = await generateStyledComponentsProfileChart(data.profile.results);
   const lines = [
     "### Styled components",
     "",
@@ -467,6 +635,20 @@ async function generateStyledComponentsTransformSection(): Promise<string> {
       `SWC/core ${data.versions.swcCore}/${data.versions.swcPlugin}; ` +
       `Yuku parser/codegen/AST ${data.versions.yukuParser}/` +
       `${data.versions.yukuCodegen}/${data.versions.yukuAst}`,
+    "",
+    `**Exact replay:** \`${data.reproduction.command}\` writes ` +
+      `\`result/${data.reproduction.resultFile}\``,
+    "",
+    "The Yuku JS plugin is a fixture-scoped implementation of the core operations exercised " +
+      "here, not a complete port of babel-plugin-styled-components. It covers import " +
+      "detection, styled factories, attrs chains, helper templates, CSS minification, " +
+      "display names, component IDs, PURE annotations, and template lowering. It does not " +
+      "claim parity for features such as the css prop, CommonJS detection, namespaces, " +
+      "top-level import path configuration, or Babel's exact filename and hashing behavior. " +
+      "These results compare the three pipelines on the validated fixture contract, not " +
+      "full plugin feature parity.",
+    "",
+    `![End-to-end styled-components transform latency](${latencyChart})`,
     "",
     "| Transformer | Median | RME | Mean | Min | Max | Ops/sec | Components | PURE | Output | Relative |",
     "|-------------|--------|-----|------|-----|-----|---------|------------|------|--------|----------|",
@@ -517,6 +699,8 @@ async function generateStyledComponentsTransformSection(): Promise<string> {
       "Stage means are reported because means are additive; the stages for one transformer " +
       "sum to its profiled pipeline mean.",
   );
+  lines.push("");
+  lines.push(`![Styled-components stage time shares](${profileChart})`);
   lines.push("");
   lines.push("| Transformer | Stage | Runtime | Mean | Share | Independent run means |");
   lines.push("|-------------|-------|---------|------|-------|-----------------------|");
@@ -588,7 +772,47 @@ function generateRunSection(): string {
 
 ### Prerequisites
 
-- [Bun](https://bun.sh/) - JavaScript runtime and package manager
+- [Bun](https://bun.sh/) 1.3.5 - package manager and canonical benchmark runtime
+- [Node.js](https://nodejs.org/) 26.7.0 - optional alternate benchmark runtime
+
+### Exact styled-components reproduction
+
+The checked-in styled-components tables were produced from the immutable
+\`styled-components-benchmark-v1\` tag. The reproduction script rejects a mismatched runtime,
+overrides all benchmark settings with the recorded values, validates the result metadata, and
+writes the raw measurements to \`result/styled-components.json\`:
+
+\`\`\`bash
+git clone https://github.com/SoonIter/ecmascript-parser-benchmark-js.git
+cd ecmascript-parser-benchmark-js
+git checkout styled-components-benchmark-v1
+bun --version # must print 1.3.5
+bun install --frozen-lockfile
+bun run reproduce:styled-components
+\`\`\`
+
+Absolute latency depends on the CPU, OS load, power mode, and thermal state. Reproduction here
+means identical source revision, dependency graph, runtime version, fixture, options, warmup,
+duration, process isolation, run count, validation, and aggregation. Compare the new raw result
+with the checked-in measurement using:
+
+\`\`\`bash
+git diff -- result/styled-components.json
+\`\`\`
+
+The harness also runs under Node. This is a separate runtime measurement and therefore writes a
+separate result file instead of overwriting the canonical Bun result:
+
+\`\`\`bash
+node --version # must print v26.7.0
+node --import tsx scripts/reproduce-styled-components.ts
+# writes result/styled-components-node.json
+\`\`\`
+
+The full Node verification run is checked in at
+[\`result/styled-components-node.json\`](result/styled-components-node.json). It is not mixed
+into the Bun tables or charts because JavaScript runtime performance is part of the measured
+pipeline.
 
 ### Steps
 
