@@ -87,6 +87,103 @@ interface FileResult {
   results: BenchResult[];
 }
 
+interface TransformBenchResult extends BenchResult {
+  consoleCallsInput: number;
+  consoleCallsOutput: number;
+  outputBytes: number;
+  outputCodeUnits: number;
+}
+
+interface TransformFileResult {
+  file: string;
+  input: string;
+  sourceBytes: number;
+  benchmark: {
+    timeMs: number;
+    warmupMs: number;
+    runs: number;
+  };
+  runtime: string;
+  system: {
+    os: string;
+    cpu: string;
+    cores: number;
+    memoryGb: number;
+  };
+  versions: {
+    babel: string;
+    yukuAst: string;
+    yukuCodegen: string;
+    yukuParser: string;
+  };
+  results: TransformBenchResult[];
+}
+
+interface StyledComponentsTransformResult extends BenchResult {
+  componentIds: number;
+  displayNames: number;
+  minifiedRules: number;
+  outputBytes: number;
+  outputCodeUnits: number;
+  pureAnnotations: number;
+  runMedians: number[];
+  taggedTemplates: number;
+  uniqueComponentIds: number;
+  withConfigCalls: number;
+}
+
+interface StyledComponentsProfileStage {
+  meanMs: number;
+  name: string;
+  runMeansMs: number[];
+  runtime: string;
+  share: number;
+}
+
+interface StyledComponentsProfileResult {
+  iterations: number;
+  meanMs: number;
+  name: string;
+  runs: number;
+  stages: StyledComponentsProfileStage[];
+}
+
+interface StyledComponentsFileResult {
+  benchmark: {
+    timeMs: number;
+    warmupMs: number;
+    runs: number;
+  };
+  fixture: {
+    sourceBytes: number;
+    styledComponents: number;
+    templates: number;
+  };
+  profile: {
+    results: StyledComponentsProfileResult[];
+    runs: number;
+    timeMs: number;
+    warmupMs: number;
+  };
+  results: StyledComponentsTransformResult[];
+  runtime: string;
+  system: {
+    os: string;
+    cpu: string;
+    cores: number;
+    memoryGb: number;
+  };
+  versions: {
+    babelCore: string;
+    babelPlugin: string;
+    swcCore: string;
+    swcPlugin: string;
+    yukuAst: string;
+    yukuCodegen: string;
+    yukuParser: string;
+  };
+}
+
 interface ParserEntry {
   key: string;
   name: string;
@@ -291,6 +388,167 @@ async function generateBenchmarksSection(): Promise<string> {
   return lines.join("\n");
 }
 
+async function generateTransformSection(): Promise<string> {
+  const content = await readFile(
+    join(process.cwd(), "result", "transform-react.json"),
+    "utf-8",
+  );
+  const data = JSON.parse(content) as TransformFileResult;
+  const results = [...data.results].sort((left, right) => left.median - right.median);
+  const fastest = results[0];
+  const lines = [
+    "## Transform Benchmark",
+    "",
+    "### Remove console",
+    "",
+    `**Input:** ${data.input} (${formatBytes(data.sourceBytes)})`,
+    "",
+    `**Runtime:** ${data.runtime}`,
+    "",
+    `**System:** ${data.system.os}; ${data.system.cpu}; ` +
+      `${data.system.cores} cores; ${data.system.memoryGb} GB`,
+    "",
+    `**Versions:** Babel ${data.versions.babel}; Yuku parser/codegen/AST ${data.versions.yukuParser}/${data.versions.yukuCodegen}/${data.versions.yukuAst}`,
+    "",
+    "| Transformer | Median | RME | Mean | Min | Max | Ops/sec | Removed | Output | Relative |",
+    "|-------------|--------|-----|------|-----|-----|---------|---------|--------|----------|",
+  ];
+
+  for (const result of results) {
+    const ratio = fastest ? result.median / fastest.median : 1;
+    const relative = result === fastest ? "baseline" : `${ratio.toFixed(2)}× slower`;
+    const cells = [
+      result.name,
+      formatTime(result.median),
+      formatRme(result.rme),
+      formatTime(result.mean),
+      formatTime(result.min),
+      formatTime(result.max),
+      formatOps(result.median),
+      String(result.consoleCallsInput - result.consoleCallsOutput),
+      formatBytes(result.outputBytes),
+      relative,
+    ];
+    const row =
+      result === fastest
+        ? cells.map((cell) => `**${cell}**`).join(" | ")
+        : cells.join(" | ");
+    lines.push(`| ${row} |`);
+  }
+
+  lines.push("");
+  lines.push(
+    `Each of the ${data.benchmark.runs} independent runs warms up for ${data.benchmark.warmupMs} ms and samples for ${data.benchmark.timeMs} ms. Both implementations remove the same calls and generate JavaScript on every iteration.`,
+  );
+  lines.push("");
+  return lines.join("\n");
+}
+
+async function generateStyledComponentsTransformSection(): Promise<string> {
+  const content = await readFile(
+    join(process.cwd(), "result", "styled-components.json"),
+    "utf-8",
+  );
+  const data = JSON.parse(content) as StyledComponentsFileResult;
+  const results = [...data.results].sort((left, right) => left.median - right.median);
+  const fastest = results[0];
+  const lines = [
+    "### Styled components",
+    "",
+    `**Input:** ${data.fixture.styledComponents} styled components and ` +
+      `${data.fixture.templates} tagged templates (${formatBytes(data.fixture.sourceBytes)})`,
+    "",
+    `**Runtime:** ${data.runtime}`,
+    "",
+    `**System:** ${data.system.os}; ${data.system.cpu}; ` +
+      `${data.system.cores} cores; ${data.system.memoryGb} GB`,
+    "",
+    `**Versions:** Babel/core ${data.versions.babelCore}/${data.versions.babelPlugin}; ` +
+      `SWC/core ${data.versions.swcCore}/${data.versions.swcPlugin}; ` +
+      `Yuku parser/codegen/AST ${data.versions.yukuParser}/` +
+      `${data.versions.yukuCodegen}/${data.versions.yukuAst}`,
+    "",
+    "| Transformer | Median | RME | Mean | Min | Max | Ops/sec | Components | PURE | Output | Relative |",
+    "|-------------|--------|-----|------|-----|-----|---------|------------|------|--------|----------|",
+  ];
+
+  for (const result of results) {
+    const ratio = fastest ? result.median / fastest.median : 1;
+    const relative = result === fastest ? "baseline" : `${ratio.toFixed(2)}× slower`;
+    const cells = [
+      result.name,
+      formatTime(result.median),
+      formatRme(result.rme),
+      formatTime(result.mean),
+      formatTime(result.min),
+      formatTime(result.max),
+      formatOps(result.median),
+      String(result.withConfigCalls),
+      String(result.pureAnnotations),
+      formatBytes(result.outputBytes),
+      relative,
+    ];
+    const row = result === fastest
+      ? cells.map((cell) => `**${cell}**`).join(" | ")
+      : cells.join(" | ");
+    lines.push(`| ${row} |`);
+  }
+
+  lines.push("");
+  lines.push("Independent run medians (ms):");
+  lines.push("");
+  for (const result of results) {
+    lines.push(
+      `- ${result.name}: ${result.runMedians.map((value) => value.toFixed(3)).join(", ")}`,
+    );
+  }
+  lines.push("");
+  lines.push(
+    `Each of the ${data.benchmark.runs} independent runs warms up for ` +
+      `${data.benchmark.warmupMs} ms and samples for ${data.benchmark.timeMs} ms. ` +
+      "Every output is reparsed and checked for display names, unique component IDs, " +
+      "CSS minification, PURE annotations, and complete tagged-template lowering.",
+  );
+  lines.push("");
+  lines.push("#### Stage breakdown");
+  lines.push("");
+  lines.push(
+    "This diagnostic profile splits each implementation at its real callable boundaries. " +
+      "Stage means are reported because means are additive; the stages for one transformer " +
+      "sum to its profiled pipeline mean.",
+  );
+  lines.push("");
+  lines.push("| Transformer | Stage | Runtime | Mean | Share | Independent run means |");
+  lines.push("|-------------|-------|---------|------|-------|-----------------------|");
+  for (const result of data.profile.results) {
+    for (const stage of result.stages) {
+      lines.push(
+        `| ${result.name} | ${stage.name} | ${stage.runtime} | ` +
+          `${formatTime(stage.meanMs)} | ${(stage.share * 100).toFixed(1)}% | ` +
+          `${stage.runMeansMs.map((value) => value.toFixed(3)).join(", ")} ms |`,
+      );
+    }
+  }
+  lines.push("");
+  lines.push(
+    `The stage profile also uses ${data.profile.runs} independent runs, each with ` +
+      `${data.profile.warmupMs} ms warmup and ${data.profile.timeMs} ms measurement. ` +
+      "Yuku is measured as source UTF-8 encoding, native parse, generated JS AST decode, " +
+      "JS plugin transform, generated JS AST encode, and native codegen. Babel is split " +
+      "through its public parse and transform-from-AST APIs. SWC's WASM plugin API returns " +
+      "generated code rather than the transformed AST, so its AST transfer, WASM plugin, " +
+      "and native codegen remain one directly measured stage.",
+  );
+  lines.push("");
+  lines.push(
+    "The end-to-end table above remains the cross-tool comparison. Split profiles make " +
+      "additional API calls and are intended to explain where each pipeline spends time, " +
+      "not to replace the end-to-end latency.",
+  );
+  lines.push("");
+  return lines.join("\n");
+}
+
 function generateParsersSection(): string {
   const lines = ["## Parsers", ""];
 
@@ -353,9 +611,21 @@ bun install
 bun bench
 \`\`\`
 
+To run only the end-to-end remove-console transform benchmark:
+
+\`\`\`bash
+bun run bench:transform
+\`\`\`
+
+To run the styled-components plugin comparison:
+
+\`\`\`bash
+bun run bench:styled-components
+\`\`\`
+
 This will run benchmarks on all test files. Results are saved to the \`result/\` directory.
 
-Benchmark duration is configurable via the environment variables \`BENCH_TIME\` (timed duration per run in ms, default 10000), \`BENCH_WARMUP\` (warmup duration in ms, default 2000), and \`BENCH_RUNS\` (independent runs per parser, default 3). For the most stable numbers, run on AC power with no other applications running.`;
+Benchmark duration is configurable via the environment variables \`BENCH_TIME\` (timed duration per run in ms, default 10000), \`BENCH_WARMUP\` (warmup duration in ms, default 2000), and \`BENCH_RUNS\` (independent runs per parser, default 3). The stage profile inherits those durations; \`PROFILE_TIME\` and \`PROFILE_WARMUP\` override them. \`STYLED_COMPONENTS_COUNT\` changes the styled-components fixture size (default 240). For the most stable numbers, run on AC power with no other applications running.`;
 }
 
 function generateMethodologySection(): string {
@@ -366,6 +636,10 @@ Each parser is benchmarked using [Tinybench](https://github.com/tinylibs/tinyben
 To keep results stable and fair, every parser × file combination runs in its own freshly spawned process, so JIT state and GC pressure from one parser never affect another. Each combination is benchmarked in multiple independent runs (3 by default), and the reported median is the median across those runs, a statistic that is robust to GC pauses, OS scheduling blips, and other outliers. The RME column shows the relative margin of error (99% confidence) within a run. Differences between parsers smaller than their combined margins should be treated as noise.
 
 Native parsers (Oxc, SWC, Yuku) run through their respective NAPI bindings, so measured time includes the binding overhead. Pure JS parsers (Acorn, Babel) run directly in the JavaScript runtime.
+
+The remove-console transform benchmark measures the complete public API pipeline on every iteration. Babel runs parse, plugin traversal, and code generation through \`@babel/core.transformSync\`. Yuku runs native Zig parse, generated binary decoding into a JavaScript ESTree, the JavaScript visitor, generated binary encoding, and native Zig code generation. The input is held in memory, generated output is consumed, comments and source maps are disabled on both sides, and each transformer runs in a fresh process. The appended exercise contains both a removable statement call and a console call nested in an expression, so the plugin must perform both removal and replacement.
+
+The styled-components benchmark uses the same end-to-end boundary. Babel runs \`babel-plugin-styled-components\` in JavaScript, SWC runs \`@swc/plugin-styled-components\` as a WASM plugin, and Yuku runs the fixture-scoped JavaScript plugin in \`scripts/yuku-styled-components-plugin.ts\` between its generated binary decoder and encoder. All three enable \`displayName\`, \`ssr\`, \`minify\`, and \`pure\`; parse and generate code on every timed iteration; and transform the same mix of \`styled.tag\`, \`styled(Component)\`, \`.attrs()\`, nested \`css\`, \`keyframes\`, \`createGlobalStyle\`, and interpolations. A correctness pass runs before timing, which also moves one-time module loading and SWC WASM compilation outside the measured steady-state transforms. Babel's official plugin does not annotate nested function-body \`css\` helpers as PURE while SWC does, so the result records the actual annotation count instead of claiming byte-for-byte output parity.
 
 **Why is Oxc slower than Babel here?** By default, \`oxc-parser\` serializes the AST to a JSON string on the Rust side and runs \`JSON.parse\` on the JavaScript side when you access \`result.program\`. Oxc's Rust-side parsing is extremely fast. It is this serialization boundary that dominates the end-to-end time. (If you call \`parseSync\` and never touch the result, Oxc looks much faster, because \`program\` is a lazy getter that defers the \`JSON.parse\`. The benchmarks above measure the time to actually obtain the full AST, which is what any real consumer of a parser does.)
 
@@ -393,6 +667,8 @@ async function main() {
     "",
     generateParsersSection(),
     await generateBenchmarksSection(),
+    await generateTransformSection(),
+    await generateStyledComponentsTransformSection(),
     generateRunSection(),
     "",
     generateMethodologySection(),

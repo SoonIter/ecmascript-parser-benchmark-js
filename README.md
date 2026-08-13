@@ -77,6 +77,71 @@ A high-performance & spec-compliant JavaScript/TypeScript compiler written in Zi
 | Oxc | 1.50 ms | ±0.23% | 1.53 ms | 1.47 ms | 7.23 ms | 665.89 ops/s | 5.06× slower |
 | SWC | 2.78 ms | ±0.32% | 2.88 ms | 2.72 ms | 22.69 ms | 359.16 ops/s | 9.39× slower |
 
+## Transform Benchmark
+
+### Remove console
+
+**Input:** files/react.js with the remove-console exercise appended (0.07 MB)
+
+**Runtime:** Bun 1.3.5
+
+**System:** darwin 24.6.0 (arm64); Apple M1 Max; 10 cores; 32 GB
+
+**Versions:** Babel 8.0.1; Yuku parser/codegen/AST 0.8.5/0.8.5/0.8.5
+
+| Transformer | Median | RME | Mean | Min | Max | Ops/sec | Removed | Output | Relative |
+|-------------|--------|-----|------|-----|-----|---------|---------|--------|----------|
+| **Yuku** | **1.60 ms** | **±1.01%** | **1.75 ms** | **1.46 ms** | **7.44 ms** | **623.77 ops/s** | **2** | **0.05 MB** | **baseline** |
+| Babel | 7.43 ms | ±1.61% | 7.90 ms | 5.45 ms | 50.81 ms | 134.58 ops/s | 2 | 0.05 MB | 4.63× slower |
+
+Each of the 3 independent runs warms up for 1000 ms and samples for 5000 ms. Both implementations remove the same calls and generate JavaScript on every iteration.
+
+### Styled components
+
+**Input:** 240 styled components and 483 tagged templates (0.12 MB)
+
+**Runtime:** Bun 1.3.5
+
+**System:** darwin 24.6.0 (arm64); Apple M1 Max; 10 cores; 32 GB
+
+**Versions:** Babel/core 8.0.1/2.3.0; SWC/core 1.15.46/12.19.0; Yuku parser/codegen/AST 0.8.5/0.8.5/0.8.5
+
+| Transformer | Median | RME | Mean | Min | Max | Ops/sec | Components | PURE | Output | Relative |
+|-------------|--------|-----|------|-----|-----|---------|------------|------|--------|----------|
+| **Yuku + JS plugin** | **10.30 ms** | **±1.34%** | **10.78 ms** | **9.41 ms** | **101.44 ms** | **97.05 ops/s** | **240** | **483** | **0.14 MB** | **baseline** |
+| SWC + WASM plugin | 19.28 ms | ±1.16% | 19.50 ms | 18.17 ms | 54.15 ms | 51.87 ops/s | 240 | 483 | 0.15 MB | 1.87× slower |
+| Babel + JS plugin | 61.40 ms | ±5.34% | 65.13 ms | 48.73 ms | 235.05 ms | 16.29 ops/s | 240 | 243 | 0.14 MB | 5.96× slower |
+
+Independent run medians (ms):
+
+- Yuku + JS plugin: 10.272, 10.304, 10.549
+- SWC + WASM plugin: 19.278, 19.160, 19.407
+- Babel + JS plugin: 58.253, 61.399, 63.805
+
+Each of the 3 independent runs warms up for 1000 ms and samples for 5000 ms. Every output is reparsed and checked for display names, unique component IDs, CSS minification, PURE annotations, and complete tagged-template lowering.
+
+#### Stage breakdown
+
+This diagnostic profile splits each implementation at its real callable boundaries. Stage means are reported because means are additive; the stages for one transformer sum to its profiled pipeline mean.
+
+| Transformer | Stage | Runtime | Mean | Share | Independent run means |
+|-------------|-------|---------|------|-------|-----------------------|
+| Babel + JS plugin | parse | JS | 3.64 ms | 5.4% | 3.364, 3.513, 4.068 ms |
+| Babel + JS plugin | plugin transform | JS | 54.63 ms | 81.8% | 53.185, 53.323, 57.629 ms |
+| Babel + JS plugin | codegen | JS | 8.52 ms | 12.8% | 8.311, 8.521, 8.737 ms |
+| SWC + WASM plugin | parse + AST transfer | native + JS | 6.77 ms | 14.7% | 6.911, 6.621, 6.776 ms |
+| SWC + WASM plugin | AST transfer + plugin + codegen | JS + WASM + native | 39.27 ms | 85.3% | 39.543, 38.783, 39.500 ms |
+| Yuku + JS plugin | source encode | JS | 0.01 ms | 0.1% | 0.012, 0.011, 0.010 ms |
+| Yuku + JS plugin | parse | native | 0.40 ms | 3.7% | 0.394, 0.407, 0.406 ms |
+| Yuku + JS plugin | AST decode | JS | 0.54 ms | 4.9% | 0.528, 0.545, 0.533 ms |
+| Yuku + JS plugin | plugin transform | JS | 7.70 ms | 70.5% | 7.525, 7.903, 7.693 ms |
+| Yuku + JS plugin | AST encode | JS | 1.55 ms | 14.1% | 1.486, 1.631, 1.524 ms |
+| Yuku + JS plugin | codegen | native | 0.73 ms | 6.7% | 0.701, 0.741, 0.754 ms |
+
+The stage profile also uses 3 independent runs, each with 1000 ms warmup and 5000 ms measurement. Yuku is measured as source UTF-8 encoding, native parse, generated JS AST decode, JS plugin transform, generated JS AST encode, and native codegen. Babel is split through its public parse and transform-from-AST APIs. SWC's WASM plugin API returns generated code rather than the transformed AST, so its AST transfer, WASM plugin, and native codegen remain one directly measured stage.
+
+The end-to-end table above remains the cross-tool comparison. Split profiles make additional API calls and are intended to explain where each pipeline spends time, not to replace the end-to-end latency.
+
 ## Run Benchmarks
 
 ### Prerequisites
@@ -104,9 +169,21 @@ bun install
 bun bench
 ```
 
+To run only the end-to-end remove-console transform benchmark:
+
+```bash
+bun run bench:transform
+```
+
+To run the styled-components plugin comparison:
+
+```bash
+bun run bench:styled-components
+```
+
 This will run benchmarks on all test files. Results are saved to the `result/` directory.
 
-Benchmark duration is configurable via the environment variables `BENCH_TIME` (timed duration per run in ms, default 10000), `BENCH_WARMUP` (warmup duration in ms, default 2000), and `BENCH_RUNS` (independent runs per parser, default 3). For the most stable numbers, run on AC power with no other applications running.
+Benchmark duration is configurable via the environment variables `BENCH_TIME` (timed duration per run in ms, default 10000), `BENCH_WARMUP` (warmup duration in ms, default 2000), and `BENCH_RUNS` (independent runs per parser, default 3). The stage profile inherits those durations; `PROFILE_TIME` and `PROFILE_WARMUP` override them. `STYLED_COMPONENTS_COUNT` changes the styled-components fixture size (default 240). For the most stable numbers, run on AC power with no other applications running.
 
 ## Methodology
 
@@ -115,6 +192,10 @@ Each parser is benchmarked using [Tinybench](https://github.com/tinylibs/tinyben
 To keep results stable and fair, every parser × file combination runs in its own freshly spawned process, so JIT state and GC pressure from one parser never affect another. Each combination is benchmarked in multiple independent runs (3 by default), and the reported median is the median across those runs, a statistic that is robust to GC pauses, OS scheduling blips, and other outliers. The RME column shows the relative margin of error (99% confidence) within a run. Differences between parsers smaller than their combined margins should be treated as noise.
 
 Native parsers (Oxc, SWC, Yuku) run through their respective NAPI bindings, so measured time includes the binding overhead. Pure JS parsers (Acorn, Babel) run directly in the JavaScript runtime.
+
+The remove-console transform benchmark measures the complete public API pipeline on every iteration. Babel runs parse, plugin traversal, and code generation through `@babel/core.transformSync`. Yuku runs native Zig parse, generated binary decoding into a JavaScript ESTree, the JavaScript visitor, generated binary encoding, and native Zig code generation. The input is held in memory, generated output is consumed, comments and source maps are disabled on both sides, and each transformer runs in a fresh process. The appended exercise contains both a removable statement call and a console call nested in an expression, so the plugin must perform both removal and replacement.
+
+The styled-components benchmark uses the same end-to-end boundary. Babel runs `babel-plugin-styled-components` in JavaScript, SWC runs `@swc/plugin-styled-components` as a WASM plugin, and Yuku runs the fixture-scoped JavaScript plugin in `scripts/yuku-styled-components-plugin.ts` between its generated binary decoder and encoder. All three enable `displayName`, `ssr`, `minify`, and `pure`; parse and generate code on every timed iteration; and transform the same mix of `styled.tag`, `styled(Component)`, `.attrs()`, nested `css`, `keyframes`, `createGlobalStyle`, and interpolations. A correctness pass runs before timing, which also moves one-time module loading and SWC WASM compilation outside the measured steady-state transforms. Babel's official plugin does not annotate nested function-body `css` helpers as PURE while SWC does, so the result records the actual annotation count instead of claiming byte-for-byte output parity.
 
 **Why is Oxc slower than Babel here?** By default, `oxc-parser` serializes the AST to a JSON string on the Rust side and runs `JSON.parse` on the JavaScript side when you access `result.program`. Oxc's Rust-side parsing is extremely fast. It is this serialization boundary that dominates the end-to-end time. (If you call `parseSync` and never touch the result, Oxc looks much faster, because `program` is a lazy getter that defers the `JSON.parse`. The benchmarks above measure the time to actually obtain the full AST, which is what any real consumer of a parser does.)
 

@@ -1,0 +1,263 @@
+{
+  "benchmark": {
+    "runs": 3,
+    "timeMs": 5000,
+    "warmupMs": 1000
+  },
+  "fixture": {
+    "sourceBytes": 128382,
+    "styledComponents": 240,
+    "templates": 483
+  },
+  "options": {
+    "displayName": true,
+    "minify": true,
+    "pure": true,
+    "ssr": true
+  },
+  "profile": {
+    "results": [
+      {
+        "iterations": 226,
+        "meanMs": 66.78079459292036,
+        "name": "Babel + JS plugin",
+        "runs": 3,
+        "stages": [
+          {
+            "meanMs": 3.6362780088495574,
+            "name": "parse",
+            "runMeansMs": [
+              3.364327987179487,
+              3.5132283246753246,
+              4.068488253521127
+            ],
+            "runtime": "JS",
+            "share": 0.05445095451492353
+          },
+          {
+            "meanMs": 54.62836207079646,
+            "name": "plugin transform",
+            "runMeansMs": [
+              53.18524670512821,
+              53.3232327012987,
+              57.629178408450706
+            ],
+            "runtime": "JS",
+            "share": 0.8180250385428596
+          },
+          {
+            "meanMs": 8.516154513274337,
+            "name": "codegen",
+            "runMeansMs": [
+              8.311021987179487,
+              8.520636857142856,
+              8.736650239436619
+            ],
+            "runtime": "JS",
+            "share": 0.1275240069422169
+          }
+        ]
+      },
+      {
+        "iterations": 328,
+        "meanMs": 46.039441942073175,
+        "name": "SWC + WASM plugin",
+        "runs": 3,
+        "stages": [
+          {
+            "meanMs": 6.768004429878048,
+            "name": "parse + AST transfer",
+            "runMeansMs": [
+              6.911337898148148,
+              6.620992504504505,
+              6.775695339449542
+            ],
+            "runtime": "native + JS",
+            "share": 0.14700448451120568
+          },
+          {
+            "meanMs": 39.27143751219513,
+            "name": "AST transfer + plugin + codegen",
+            "runMeansMs": [
+              39.542640462962964,
+              38.78308105405405,
+              39.500039788990826
+            ],
+            "runtime": "JS + WASM + native",
+            "share": 0.8529955154887943
+          }
+        ]
+      },
+      {
+        "iterations": 1373,
+        "meanMs": 10.928622648943918,
+        "name": "Yuku + JS plugin",
+        "runs": 3,
+        "stages": [
+          {
+            "meanMs": 0.010710150764748724,
+            "name": "source encode",
+            "runMeansMs": [
+              0.011540955319148935,
+              0.01073529213483146,
+              0.009833150655021834
+            ],
+            "runtime": "JS",
+            "share": 0.0009800092023292337
+          },
+          {
+            "meanMs": 0.40213862855061905,
+            "name": "parse",
+            "runMeansMs": [
+              0.3936673617021277,
+              0.40699644719101125,
+              0.4061119170305677
+            ],
+            "runtime": "native",
+            "share": 0.03679682623038316
+          },
+          {
+            "meanMs": 0.5355075214857975,
+            "name": "AST decode",
+            "runMeansMs": [
+              0.5280675659574469,
+              0.5454775168539326,
+              0.5334554061135371
+            ],
+            "runtime": "JS",
+            "share": 0.049000458583639175
+          },
+          {
+            "meanMs": 7.70325554989075,
+            "name": "plugin transform",
+            "runMeansMs": [
+              7.52461275106383,
+              7.902687355056179,
+              7.692807868995633
+            ],
+            "runtime": "JS",
+            "share": 0.7048697532470068
+          },
+          {
+            "meanMs": 1.5455306569555718,
+            "name": "AST encode",
+            "runMeansMs": [
+              1.4860411680851064,
+              1.6305658314606741,
+              1.523957310043668
+            ],
+            "runtime": "JS",
+            "share": 0.14142044305143278
+          },
+          {
+            "meanMs": 0.7314801412964312,
+            "name": "codegen",
+            "runMeansMs": [
+              0.7006143361702127,
+              0.7410406269662921,
+              0.7538655393013101
+            ],
+            "runtime": "native",
+            "share": 0.06693250968520881
+          }
+        ]
+      }
+    ],
+    "runs": 3,
+    "timeMs": 5000,
+    "warmupMs": 1000
+  },
+  "results": [
+    {
+      "name": "Yuku + JS plugin",
+      "mean": 10.779313907327602,
+      "min": 9.40558400000009,
+      "max": 101.44391600000017,
+      "median": 10.303854499999943,
+      "stddev": 1.5874213604839764,
+      "rme": 1.3434668628984343,
+      "samples": 1359,
+      "componentIds": 240,
+      "displayNames": 240,
+      "minifiedRules": 240,
+      "outputBytes": 147475,
+      "outputCodeUnits": 147475,
+      "pureAnnotations": 483,
+      "taggedTemplates": 0,
+      "uniqueComponentIds": 240,
+      "withConfigCalls": 240,
+      "runMedians": [
+        10.271874999999909,
+        10.303854499999943,
+        10.548749999999927
+      ],
+      "runs": 3
+    },
+    {
+      "name": "SWC + WASM plugin",
+      "mean": 19.495839665369637,
+      "min": 18.167707999999948,
+      "max": 54.14983300000017,
+      "median": 19.278166999999485,
+      "stddev": 1.8399345263441982,
+      "rme": 1.1630628658209663,
+      "samples": 768,
+      "componentIds": 240,
+      "displayNames": 240,
+      "minifiedRules": 240,
+      "outputBytes": 158892,
+      "outputCodeUnits": 158892,
+      "pureAnnotations": 483,
+      "taggedTemplates": 0,
+      "uniqueComponentIds": 240,
+      "withConfigCalls": 240,
+      "runMedians": [
+        19.278166999999485,
+        19.16031199999975,
+        19.406958999999915
+      ],
+      "runs": 3
+    },
+    {
+      "name": "Babel + JS plugin",
+      "mean": 65.1262223246753,
+      "min": 48.72508300000027,
+      "max": 235.05312500000036,
+      "median": 61.3993330000003,
+      "stddev": 15.311005631500826,
+      "rme": 5.336056469587171,
+      "samples": 235,
+      "componentIds": 240,
+      "displayNames": 240,
+      "minifiedRules": 240,
+      "outputBytes": 143390,
+      "outputCodeUnits": 143390,
+      "pureAnnotations": 243,
+      "taggedTemplates": 0,
+      "uniqueComponentIds": 240,
+      "withConfigCalls": 240,
+      "runMedians": [
+        58.2534999999998,
+        61.3993330000003,
+        63.80495900000005
+      ],
+      "runs": 3
+    }
+  ],
+  "runtime": "Bun 1.3.5",
+  "system": {
+    "cores": 10,
+    "cpu": "Apple M1 Max",
+    "memoryGb": 32,
+    "os": "darwin 24.6.0 (arm64)"
+  },
+  "versions": {
+    "babelCore": "8.0.1",
+    "babelPlugin": "2.3.0",
+    "swcCore": "1.15.46",
+    "swcPlugin": "12.19.0",
+    "yukuAst": "0.8.5",
+    "yukuCodegen": "0.8.5",
+    "yukuParser": "0.8.5"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "file": "react",
+  "input": "files/react.js with the remove-console exercise appended",
+  "sourceBytes": 72227,
+  "benchmark": {
+    "timeMs": 5000,
+    "warmupMs": 1000,
+    "runs": 3
+  },
+  "runtime": "Bun 1.3.5",
+  "system": {
+    "os": "darwin 24.6.0 (arm64)",
+    "cpu": "Apple M1 Max",
+    "cores": 10,
+    "memoryGb": 32
+  },
+  "versions": {
+    "babel": "8.0.1",
+    "yukuAst": "0.8.5",
+    "yukuCodegen": "0.8.5",
+    "yukuParser": "0.8.5"
+  },
+  "results": [
+    {
+      "name": "Yuku",
+      "mean": 1.7534118373071517,
+      "min": 1.4571249999999054,
+      "max": 7.436874999999873,
+      "median": 1.603146000000379,
+      "stddev": 0.4841927123748261,
+      "rme": 1.0134810324194725,
+      "samples": 8588,
+      "runs": 3,
+      "consoleCallsInput": 2,
+      "consoleCallsOutput": 0,
+      "outputBytes": 54772,
+      "outputCodeUnits": 54772
+    },
+    {
+      "name": "Babel",
+      "mean": 7.90416257187995,
+      "min": 5.449999999999818,
+      "max": 50.8146670000001,
+      "median": 7.430333499999961,
+      "stddev": 1.6348556147173636,
+      "rme": 1.6143670200015072,
+      "samples": 1891,
+      "runs": 3,
+      "consoleCallsInput": 2,
+      "consoleCallsOutput": 0,
+      "outputBytes": 57206,
+      "outputCodeUnits": 57206
+    }
+  ]
+}
