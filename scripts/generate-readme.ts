@@ -105,6 +105,10 @@ function formatTime(ms: number): string {
   return `${ms.toFixed(2)} ms`;
 }
 
+function formatThroughput(bytes: number, ms: number): string {
+  return `${(bytes / (1024 * 1024) / (ms / 1000)).toFixed(1)} MB/s`;
+}
+
 function formatOps(medianMs: number): string {
   const ops = 1000 / medianMs;
   return `${ops.toFixed(2)} ops/s`;
@@ -141,7 +145,11 @@ function getParserEntries(data: FileResult): ParserEntry[] {
   return entries;
 }
 
-async function generateChart(entries: ParserEntry[], chartName: string): Promise<string> {
+async function generateChart(
+  entries: ParserEntry[],
+  chartName: string,
+  fileSize: number,
+): Promise<string> {
   const data = entries.filter((e) => e.result != null);
   if (data.length === 0) return "";
 
@@ -214,11 +222,23 @@ async function generateChart(entries: ParserEntry[], chartName: string): Promise
             const bar = meta.data[i];
             const value = dataset.data[i] as number;
             ctx.save();
-            ctx.fillStyle = "#CAC1B0";
             ctx.font = `${9 * dpr}px sans-serif`;
-            ctx.textAlign = "left";
             ctx.textBaseline = "middle";
-            ctx.fillText(`${value.toFixed(2)}ms`, bar.x + 8 * dpr, bar.y);
+            ctx.fillStyle = "#CAC1B0";
+            ctx.textAlign = "left";
+            const msLabel = `${value.toFixed(2)}ms`;
+            ctx.fillText(msLabel, bar.x + 8 * dpr, bar.y);
+            const throughput = formatThroughput(fileSize, value);
+            const barWidth = bar.x - (bar as unknown as { base: number }).base;
+            if (barWidth >= ctx.measureText(throughput).width + 16 * dpr) {
+              ctx.font = `${8 * dpr}px sans-serif`;
+              ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+              ctx.textAlign = "right";
+              ctx.fillText(throughput, bar.x - 8 * dpr, bar.y);
+            } else {
+              const msWidth = ctx.measureText(msLabel).width;
+              ctx.fillText(`· ${throughput}`, bar.x + 8 * dpr + msWidth + 4 * dpr, bar.y);
+            }
             ctx.restore();
           }
         },
@@ -282,7 +302,7 @@ async function generateBenchmarksSection(): Promise<string> {
     lines.push(`**File size:** ${formatBytes(fileSize)}`);
     lines.push("");
 
-    const chartPath = await generateChart(entries, fileKey);
+    const chartPath = await generateChart(entries, fileKey, fileSize);
     if (chartPath) {
       lines.push(`![Bar chart comparing npm parser speeds for ${fileName}](${chartPath})`);
       lines.push("");
