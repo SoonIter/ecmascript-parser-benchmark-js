@@ -230,12 +230,14 @@ async function generateChart(
             ctx.fillText(msLabel, bar.x + 8 * dpr, bar.y);
             const throughput = formatThroughput(fileSize, value);
             const barWidth = bar.x - (bar as unknown as { base: number }).base;
-            if (barWidth >= ctx.measureText(throughput).width + 16 * dpr) {
-              ctx.font = `${8 * dpr}px sans-serif`;
+            ctx.font = `${8 * dpr}px sans-serif`;
+            const inset = Math.min(8 * dpr, (barWidth - ctx.measureText(throughput).width) / 2);
+            if (inset >= 2 * dpr) {
               ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
               ctx.textAlign = "right";
-              ctx.fillText(throughput, bar.x - 8 * dpr, bar.y);
+              ctx.fillText(throughput, bar.x - inset, bar.y);
             } else {
+              ctx.font = `${9 * dpr}px sans-serif`;
               const msWidth = ctx.measureText(msLabel).width;
               ctx.fillText(`· ${throughput}`, bar.x + 8 * dpr + msWidth + 4 * dpr, bar.y);
             }
