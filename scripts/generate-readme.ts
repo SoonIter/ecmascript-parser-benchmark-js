@@ -150,9 +150,9 @@ async function generateChart(entries: ParserEntry[], chartName: string): Promise
   const colors = data.map((e) => CHART_COLORS[e.key] ?? "#888888");
 
   const maxTime = Math.max(...medianData);
-  const niceSteps = [10, 20, 25, 50, 100, 200, 250, 500];
   const rawStep = maxTime / 4;
-  const step = niceSteps.find((s) => s >= rawStep) || Math.ceil(rawStep / 100) * 100;
+  const magnitude = 10 ** Math.floor(Math.log10(rawStep));
+  const step = [1, 2, 2.5, 5, 10].map((s) => s * magnitude).find((s) => s >= rawStep)!;
   const chartMax = Math.ceil(maxTime / step) * step;
 
   const dpr = 3;
