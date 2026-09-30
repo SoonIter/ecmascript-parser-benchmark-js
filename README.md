@@ -43,11 +43,11 @@ A high-performance & spec-compliant JavaScript/TypeScript compiler written in Zi
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
-| **Yuku** | **45.00 ms** | **±0.59%** | **45.39 ms** | **42.60 ms** | **57.92 ms** | **22.22 ops/s** | **baseline** |
-| Acorn | 144.54 ms | ±1.74% | 145.85 ms | 125.37 ms | 216.86 ms | 6.92 ops/s | 3.21× slower |
-| Babel | 163.80 ms | ±2.64% | 165.72 ms | 133.78 ms | 222.11 ms | 6.11 ops/s | 3.64× slower |
-| Oxc | 210.73 ms | ±0.21% | 211.18 ms | 208.49 ms | 217.12 ms | 4.75 ops/s | 4.68× slower |
-| SWC | 374.01 ms | ±1.18% | 381.96 ms | 367.59 ms | 496.17 ms | 2.67 ops/s | 8.31× slower |
+| **Yuku** | **42.67 ms** | **±0.90%** | **43.25 ms** | **39.90 ms** | **104.48 ms** | **23.44 ops/s** | **baseline** |
+| Acorn | 142.74 ms | ±2.92% | 146.52 ms | 127.31 ms | 276.63 ms | 7.01 ops/s | 3.35× slower |
+| Babel | 173.73 ms | ±5.11% | 183.17 ms | 134.40 ms | 416.32 ms | 5.76 ops/s | 4.07× slower |
+| Oxc | 218.35 ms | ±1.67% | 224.04 ms | 205.26 ms | 373.63 ms | 4.58 ops/s | 5.12× slower |
+| SWC | 433.36 ms | ±3.73% | 440.36 ms | 371.84 ms | 1316.07 ms | 2.31 ops/s | 10.16× slower |
 
 ### [checker.ts](https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/refs/heads/main/checker.ts)
 
@@ -57,10 +57,10 @@ A high-performance & spec-compliant JavaScript/TypeScript compiler written in Zi
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
-| **Yuku** | **16.88 ms** | **±0.55%** | **17.13 ms** | **15.60 ms** | **39.22 ms** | **59.23 ops/s** | **baseline** |
-| Oxc | 62.16 ms | ±0.78% | 63.38 ms | 60.59 ms | 108.56 ms | 16.09 ops/s | 3.68× slower |
-| Babel | 67.34 ms | ±1.25% | 67.67 ms | 53.97 ms | 110.63 ms | 14.85 ops/s | 3.99× slower |
-| SWC | 121.14 ms | ±0.27% | 121.47 ms | 118.76 ms | 127.58 ms | 8.25 ops/s | 7.18× slower |
+| **Yuku** | **16.15 ms** | **±1.12%** | **16.60 ms** | **14.63 ms** | **55.30 ms** | **61.93 ops/s** | **baseline** |
+| Oxc | 62.78 ms | ±1.07% | 64.33 ms | 60.55 ms | 115.69 ms | 15.93 ops/s | 3.89× slower |
+| Babel | 66.34 ms | ±1.38% | 66.74 ms | 52.88 ms | 114.67 ms | 15.07 ops/s | 4.11× slower |
+| SWC | 123.45 ms | ±1.11% | 126.84 ms | 118.83 ms | 179.16 ms | 8.10 ops/s | 7.65× slower |
 | Acorn | Failed to parse | - | - | - | - | - | - |
 
 ### [lib.dom.d.ts](https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/refs/heads/main/lib.dom.d.ts)
@@ -71,10 +71,10 @@ A high-performance & spec-compliant JavaScript/TypeScript compiler written in Zi
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
-| **Yuku** | **8.67 ms** | **±0.68%** | **8.76 ms** | **7.89 ms** | **36.38 ms** | **115.37 ops/s** | **baseline** |
-| Oxc | 23.87 ms | ±0.89% | 24.24 ms | 23.03 ms | 75.74 ms | 41.89 ops/s | 2.75× slower |
-| Babel | 36.17 ms | ±1.24% | 36.54 ms | 30.91 ms | 69.46 ms | 27.64 ops/s | 4.17× slower |
-| SWC | 50.77 ms | ±0.64% | 50.93 ms | 49.38 ms | 83.83 ms | 19.70 ops/s | 5.86× slower |
+| **Yuku** | **8.66 ms** | **±0.77%** | **8.73 ms** | **7.62 ms** | **48.86 ms** | **115.47 ops/s** | **baseline** |
+| Oxc | 24.08 ms | ±0.75% | 24.41 ms | 22.88 ms | 55.53 ms | 41.53 ops/s | 2.78× slower |
+| Babel | 37.90 ms | ±1.32% | 38.60 ms | 30.87 ms | 73.67 ms | 26.39 ops/s | 4.38× slower |
+| SWC | 50.62 ms | ±0.74% | 50.91 ms | 48.80 ms | 89.26 ms | 19.76 ops/s | 5.84× slower |
 | Acorn | Failed to parse | - | - | - | - | - | - |
 
 ### [react.js](https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/refs/heads/main/react.js)
@@ -85,11 +85,11 @@ A high-performance & spec-compliant JavaScript/TypeScript compiler written in Zi
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
-| **Yuku** | **0.29 ms** | **±0.39%** | **0.33 ms** | **0.28 ms** | **2.35 ms** | **3457.71 ops/s** | **baseline** |
-| Acorn | 0.85 ms | ±0.31% | 0.89 ms | 0.79 ms | 21.06 ms | 1179.88 ops/s | 2.93× slower |
-| Babel | 1.12 ms | ±0.72% | 1.26 ms | 0.90 ms | 15.86 ms | 896.48 ops/s | 3.86× slower |
-| Oxc | 1.12 ms | ±0.42% | 1.18 ms | 1.09 ms | 16.07 ms | 890.37 ops/s | 3.88× slower |
-| SWC | 2.09 ms | ±0.47% | 2.17 ms | 2.04 ms | 26.09 ms | 477.56 ops/s | 7.24× slower |
+| **Yuku** | **0.28 ms** | **±0.51%** | **0.33 ms** | **0.26 ms** | **15.58 ms** | **3593.35 ops/s** | **baseline** |
+| Acorn | 0.86 ms | ±0.46% | 0.91 ms | 0.79 ms | 17.66 ms | 1167.20 ops/s | 3.08× slower |
+| Babel | 1.12 ms | ±0.89% | 1.28 ms | 0.90 ms | 30.19 ms | 892.66 ops/s | 4.03× slower |
+| Oxc | 1.13 ms | ±0.58% | 1.22 ms | 1.08 ms | 20.31 ms | 888.56 ops/s | 4.04× slower |
+| SWC | 2.12 ms | ±0.47% | 2.22 ms | 2.05 ms | 36.86 ms | 472.41 ops/s | 7.61× slower |
 
 ## Run Benchmarks
 
