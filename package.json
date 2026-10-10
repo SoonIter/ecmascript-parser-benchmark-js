@@ -14,15 +14,15 @@
     "type-check": "tsgo --noEmit"
   },
   "dependencies": {
-    "@babel/parser": "^8.0.5",
+    "@babel/parser": "8.0.7",
     "@swc-next/parser": "0.2.4",
-    "@swc/core": "^1.16.13",
-    "acorn": "^8.18.0",
+    "@swc/core": "1.16.13",
+    "acorn": "8.19.0",
     "chart.js": "^4.5.1",
     "chartjs-node-canvas": "^5.0.0",
-    "oxc-parser": "^0.152.0",
+    "oxc-parser": "0.153.0",
     "tinybench": "^6.2.0",
-    "yuku-parser": "^0.14.0"
+    "yuku-parser": "0.18.1"
   },
   "devDependencies": {
     "@types/bun": "^1.4.2",
