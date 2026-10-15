@@ -6,7 +6,7 @@ import * as babel from "@babel/parser";
 import * as oxc from "oxc-parser";
 import swc from "@swc/core";
 import type { ParseOptions as SwcParseOptions } from "@swc/types";
-import { parse as yukuParseSync, type SourceLang } from "yuku-parser";
+import { parse as yukuParseSync, type SourceLang } from "yuku";
 
 const FILES: Record<string, { path: string; lang: SourceLang }> = {
   typescript: { path: "files/typescript.js", lang: "js" },
