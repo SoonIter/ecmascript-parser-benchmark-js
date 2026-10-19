@@ -1,6 +1,7 @@
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { Bench } from "tinybench";
+import { collectMetadata } from "./metadata";
 import * as acorn from "acorn";
 import * as babel from "@babel/parser";
 import * as oxc from "oxc-parser";
@@ -181,7 +182,8 @@ async function benchFile(
       if (out.ok && out.result) runs.push(out.result);
       else console.error(`  ${name} run ${run} did not complete`);
     }
-    if (runs.length > 0) results.push(aggregateRuns(name, runs));
+    if (runs.length !== BENCH_RUNS) throw new Error(`${name}: completed ${runs.length}/${BENCH_RUNS} runs for ${fileKey}`);
+    results.push(aggregateRuns(name, runs));
   }
 
   results.sort((a, b) => a.median - b.median);
@@ -214,11 +216,17 @@ async function main() {
       : Object.entries(FILES);
 
   await mkdir(join(process.cwd(), "result"), { recursive: true });
+  const metadata = await collectMetadata(filesToBench.map(([, file]) => file.path), {
+    time: BENCH_TIME, warmup: BENCH_WARMUP, runs: BENCH_RUNS,
+  });
 
   for (const [key, file] of filesToBench) {
     const result = await benchFile(key, file);
     await writeFile(join(process.cwd(), "result", `${key}.json`), JSON.stringify(result, null, 2));
   }
+
+  const metadataPath = args.length === 0 ? "metadata.json" : `metadata-${filesToBench.map(([key]) => key).join("-")}.json`;
+  await writeFile(join("result", metadataPath), `${JSON.stringify({ ...metadata, completedAt: new Date().toISOString() }, null, 2)}\n`);
 
   console.log("\nBenchmark complete!");
 }

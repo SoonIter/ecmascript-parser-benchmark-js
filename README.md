@@ -6,10 +6,16 @@ Benchmarks for ECMAScript parsers available as npm packages, including pure Java
 
 | Property | Value |
 |----------|-------|
-| OS | macOS 25.6.0 (arm64) |
+| OS | macOS (Darwin kernel) 25.6.0 (arm64) |
 | CPU | Apple M5 Max |
 | Cores | 18 |
 | Memory | 64 GB |
+| Bun | 1.4.0 |
+| Run started (UTC) | 2026-10-16T07:54:33.734Z |
+
+Parser versions: `@babel/parser@8.0.7`; `@swc-next/parser@0.3.0`; `@swc/core@1.16.18`; `acorn@8.19.0`; `oxc-parser@0.154.0`; `yuku-parser@0.19.0`.
+
+Run parameters, installed package versions, fixture revision and SHA-256 hashes are saved in [result/metadata.json](result/metadata.json).
 
 ## Parsers
 
@@ -39,7 +45,7 @@ The next-generation SWC JavaScript and TypeScript parser.
 
 ## Benchmarks
 
-### [typescript.js](https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/refs/heads/main/typescript.js)
+### [typescript.js](https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/e25ab06730f743838b2c693d2126ea0162a661c6/typescript.js)
 
 **File size:** 7.83 MB
 
@@ -47,14 +53,14 @@ The next-generation SWC JavaScript and TypeScript parser.
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
-| **SWC Next** | **31.74 ms** | **±0.62%** | **31.62 ms** | **28.26 ms** | **43.56 ms** | **31.50 ops/s** | **baseline** |
-| Yuku | 36.69 ms | ±0.61% | 36.85 ms | 34.16 ms | 69.24 ms | 27.26 ops/s | 1.16× slower |
-| Acorn | 114.96 ms | ±1.36% | 115.96 ms | 95.31 ms | 150.60 ms | 8.70 ops/s | 3.62× slower |
-| Babel | 131.57 ms | ±2.91% | 132.61 ms | 103.24 ms | 185.43 ms | 7.60 ops/s | 4.14× slower |
-| Oxc | 176.85 ms | ±1.03% | 178.76 ms | 167.85 ms | 215.28 ms | 5.65 ops/s | 5.57× slower |
-| SWC | 322.39 ms | ±0.74% | 324.89 ms | 310.60 ms | 356.53 ms | 3.10 ops/s | 10.16× slower |
+| **SWC Next** | **31.86 ms** | **±1.07%** | **32.05 ms** | **27.53 ms** | **70.94 ms** | **31.39 ops/s** | **baseline** |
+| Yuku | 36.97 ms | ±0.68% | 37.59 ms | 34.03 ms | 70.92 ms | 27.05 ops/s | 1.16× slower |
+| Acorn | 112.51 ms | ±1.28% | 113.08 ms | 96.39 ms | 151.95 ms | 8.89 ops/s | 3.53× slower |
+| Babel | 131.22 ms | ±3.12% | 132.41 ms | 104.21 ms | 413.47 ms | 7.62 ops/s | 4.12× slower |
+| Oxc | 172.21 ms | ±1.10% | 177.08 ms | 167.52 ms | 218.78 ms | 5.81 ops/s | 5.41× slower |
+| SWC | 324.03 ms | ±1.17% | 329.24 ms | 310.34 ms | 491.05 ms | 3.09 ops/s | 10.17× slower |
 
-### [checker.ts](https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/refs/heads/main/checker.ts)
+### [checker.ts](https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/e25ab06730f743838b2c693d2126ea0162a661c6/checker.ts)
 
 **File size:** 2.95 MB
 
@@ -62,14 +68,14 @@ The next-generation SWC JavaScript and TypeScript parser.
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
-| **SWC Next** | **12.05 ms** | **±0.76%** | **12.36 ms** | **10.62 ms** | **34.02 ms** | **83.02 ops/s** | **baseline** |
-| Yuku | 13.71 ms | ±0.62% | 14.02 ms | 12.54 ms | 19.72 ms | 72.94 ops/s | 1.14× slower |
-| Oxc | 52.96 ms | ±0.58% | 53.59 ms | 50.90 ms | 67.39 ms | 18.88 ops/s | 4.40× slower |
-| Babel | 53.84 ms | ±1.16% | 54.21 ms | 42.88 ms | 67.91 ms | 18.57 ops/s | 4.47× slower |
-| SWC | 104.20 ms | ±0.64% | 104.90 ms | 101.46 ms | 154.92 ms | 9.60 ops/s | 8.65× slower |
-| Acorn | Failed to parse | - | - | - | - | - | - |
+| **SWC Next** | **12.62 ms** | **±0.88%** | **13.05 ms** | **10.78 ms** | **30.71 ms** | **79.22 ops/s** | **baseline** |
+| Yuku | 14.67 ms | ±0.71% | 15.03 ms | 12.85 ms | 38.94 ms | 68.18 ops/s | 1.16× slower |
+| Oxc | 53.17 ms | ±1.18% | 53.92 ms | 50.85 ms | 112.68 ms | 18.81 ops/s | 4.21× slower |
+| Babel | 54.37 ms | ±1.29% | 54.48 ms | 42.84 ms | 110.62 ms | 18.39 ops/s | 4.31× slower |
+| SWC | 106.12 ms | ±0.73% | 106.90 ms | 101.27 ms | 176.02 ms | 9.42 ops/s | 8.41× slower |
+| Acorn | TypeScript not supported | - | - | - | - | - | - |
 
-### [lib.dom.d.ts](https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/refs/heads/main/lib.dom.d.ts)
+### [lib.dom.d.ts](https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/e25ab06730f743838b2c693d2126ea0162a661c6/lib.dom.d.ts)
 
 **File size:** 2.24 MB
 
@@ -77,14 +83,14 @@ The next-generation SWC JavaScript and TypeScript parser.
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
-| **SWC Next** | **5.08 ms** | **±0.46%** | **5.04 ms** | **4.06 ms** | **26.93 ms** | **196.70 ops/s** | **baseline** |
-| Yuku | 6.37 ms | ±0.50% | 6.71 ms | 6.03 ms | 11.94 ms | 157.11 ops/s | 1.25× slower |
-| Oxc | 20.16 ms | ±0.48% | 20.44 ms | 18.80 ms | 27.61 ms | 49.61 ops/s | 3.96× slower |
-| Babel | 27.44 ms | ±0.81% | 27.56 ms | 23.11 ms | 40.72 ms | 36.45 ops/s | 5.40× slower |
-| SWC | 43.22 ms | ±0.31% | 43.44 ms | 41.78 ms | 51.10 ms | 23.13 ops/s | 8.50× slower |
-| Acorn | Failed to parse | - | - | - | - | - | - |
+| **SWC Next** | **5.25 ms** | **±0.61%** | **5.28 ms** | **4.11 ms** | **22.12 ms** | **190.49 ops/s** | **baseline** |
+| Yuku | 6.43 ms | ±0.45% | 6.73 ms | 6.07 ms | 11.78 ms | 155.53 ops/s | 1.22× slower |
+| Oxc | 20.81 ms | ±0.51% | 20.98 ms | 19.09 ms | 72.62 ms | 48.05 ops/s | 3.96× slower |
+| Babel | 30.28 ms | ±0.91% | 30.72 ms | 24.68 ms | 65.56 ms | 33.03 ops/s | 5.77× slower |
+| SWC | 43.37 ms | ±0.42% | 43.68 ms | 41.88 ms | 53.58 ms | 23.06 ops/s | 8.26× slower |
+| Acorn | TypeScript not supported | - | - | - | - | - | - |
 
-### [react.js](https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/refs/heads/main/react.js)
+### [react.js](https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/e25ab06730f743838b2c693d2126ea0162a661c6/react.js)
 
 **File size:** 0.07 MB
 
@@ -92,12 +98,12 @@ The next-generation SWC JavaScript and TypeScript parser.
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
-| **SWC Next** | **0.18 ms** | **±0.70%** | **0.26 ms** | **0.16 ms** | **4.46 ms** | **5471.96 ops/s** | **baseline** |
-| Yuku | 0.23 ms | ±0.55% | 0.28 ms | 0.20 ms | 2.52 ms | 4356.50 ops/s | 1.26× slower |
-| Acorn | 0.65 ms | ±0.44% | 0.72 ms | 0.60 ms | 3.75 ms | 1529.73 ops/s | 3.58× slower |
-| Babel | 0.90 ms | ±0.75% | 1.04 ms | 0.68 ms | 7.87 ms | 1112.19 ops/s | 4.92× slower |
-| Oxc | 0.95 ms | ±0.36% | 1.02 ms | 0.90 ms | 2.77 ms | 1055.87 ops/s | 5.18× slower |
-| SWC | 1.89 ms | ±0.37% | 1.99 ms | 1.78 ms | 11.52 ms | 528.75 ops/s | 10.35× slower |
+| **SWC Next** | **0.18 ms** | **±0.80%** | **0.26 ms** | **0.15 ms** | **7.02 ms** | **5598.32 ops/s** | **baseline** |
+| Yuku | 0.23 ms | ±0.70% | 0.30 ms | 0.20 ms | 7.30 ms | 4271.99 ops/s | 1.31× slower |
+| Acorn | 0.66 ms | ±0.46% | 0.73 ms | 0.57 ms | 3.49 ms | 1523.13 ops/s | 3.68× slower |
+| Babel | 0.88 ms | ±0.70% | 1.02 ms | 0.65 ms | 4.48 ms | 1131.81 ops/s | 4.95× slower |
+| Oxc | 0.95 ms | ±0.49% | 1.03 ms | 0.87 ms | 14.68 ms | 1049.91 ops/s | 5.33× slower |
+| SWC | 1.92 ms | ±0.38% | 2.05 ms | 1.75 ms | 6.15 ms | 521.80 ops/s | 10.73× slower |
 
 ## Run Benchmarks
 
@@ -117,13 +123,20 @@ cd ecmascript-parser-benchmark-js
 2. Install dependencies:
 
 ```bash
-bun install
+bun install --frozen-lockfile
 ```
 
 3. Download the benchmark files:
 
 ```bash
 bun load-files
+```
+
+The downloader follows the fixture repository's HEAD. To reproduce the inputs measured here:
+
+```bash
+git -C files fetch --depth 1 origin e25ab06730f743838b2c693d2126ea0162a661c6
+git -C files checkout --detach e25ab06730f743838b2c693d2126ea0162a661c6
 ```
 
 4. Run benchmarks:

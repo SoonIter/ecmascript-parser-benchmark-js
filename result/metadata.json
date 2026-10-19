@@ -1,0 +1,57 @@
+{
+  "startedAt": "2026-10-16T07:54:33.734Z",
+  "system": {
+    "platform": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64",
+    "cpu": "Apple M5 Max",
+    "cores": 18,
+    "memoryGB": 64
+  },
+  "bun": "1.4.0",
+  "settings": {
+    "time": 10000,
+    "warmup": 2000,
+    "runs": 3
+  },
+  "packages": {
+    "@babel/parser": "8.0.7",
+    "@swc-next/parser": "0.3.0",
+    "@swc/core": "1.16.18",
+    "acorn": "8.19.0",
+    "chart.js": "4.5.1",
+    "chartjs-node-canvas": "5.0.0",
+    "oxc-parser": "0.154.0",
+    "tinybench": "6.2.2",
+    "yuku-parser": "0.19.0",
+    "@types/bun": "1.4.3",
+    "@types/node": "26.6.5",
+    "@typescript/native-preview": "7.0.0-dev.20260707.2",
+    "typescript": "7.0.2"
+  },
+  "fixturesCommit": "e25ab06730f743838b2c693d2126ea0162a661c6",
+  "files": [
+    {
+      "path": "files/typescript.js",
+      "bytes": 8207497,
+      "sha256": "804f9c1b6c64568c39dd48eee88b77ba92d0b5d0f44f425bc96bcfe052824644"
+    },
+    {
+      "path": "files/checker.ts",
+      "bytes": 3097339,
+      "sha256": "ae146e68e6a201befeb45683310d13fc5eaa8875146daf046203a49648286ab1"
+    },
+    {
+      "path": "files/lib.dom.d.ts",
+      "bytes": 2349483,
+      "sha256": "d6b1eba8496bdd0eed6fc8a685768fe01b2da4a0388b5fe7df558290bffcf32f"
+    },
+    {
+      "path": "files/react.js",
+      "bytes": 72141,
+      "sha256": "ec670cc82d2aac81844bae49353d11bef1a8a21e727290a3bcc24a2928839496"
+    }
+  ],
+  "lockSha256": "5a8b5dc0796eaa535ea5b0d2f381dde493ae2612d117fab84f41de18aae36623",
+  "completedAt": "2026-10-16T08:08:51.481Z"
+}

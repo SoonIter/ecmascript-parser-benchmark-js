@@ -1,11 +1,12 @@
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
-import { arch, cpus, platform, release, totalmem } from "node:os";
+import type { BenchmarkMetadata } from "./metadata";
 import { join } from "node:path";
 import type { ChartConfiguration } from "chart.js";
 import { ChartJSNodeCanvas } from "chartjs-node-canvas";
 
+const metadata: BenchmarkMetadata = JSON.parse(await readFile("result/metadata.json", "utf-8"));
 const FILES_SOURCE_URL_PREFIX =
-  "https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/refs/heads/main";
+  `https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/${metadata.fixturesCommit}`;
 
 const PARSERS = {
   acorn: {
@@ -273,7 +274,7 @@ function generateTable(entries: ParserEntry[]): string {
 
   for (const { name, result } of entries) {
     if (!result) {
-      lines.push(`| ${name} | Failed to parse | - | - | - | - | - | - |`);
+      lines.push(`| ${name} | ${name === "Acorn" ? "TypeScript not supported" : "No result"} | - | - | - | - | - | - |`);
       continue;
     }
     const isFastest = result === fastest;
@@ -338,15 +339,9 @@ function generateParsersSection(): string {
 }
 
 function getSystemInfo(): string {
-  const cpu = cpus()[0];
-  const cpuModel = cpu?.model || "Unknown CPU";
-  const cpuCores = cpus().length;
-  const totalMemoryGB = (totalmem() / (1024 * 1024 * 1024)).toFixed(0);
-  const os = platform();
-  const osArch = arch();
-  const osRelease = release();
+  const { cpu: cpuModel, cores: cpuCores, memoryGB: totalMemoryGB, platform: os, arch: osArch, release: osRelease } = metadata.system;
   const osName =
-    os === "darwin" ? "macOS" : os === "win32" ? "Windows" : os === "linux" ? "Linux" : os;
+    os === "darwin" ? "macOS (Darwin kernel)" : os === "win32" ? "Windows" : os === "linux" ? "Linux" : os;
 
   return `## System
 
@@ -355,7 +350,13 @@ function getSystemInfo(): string {
 | OS | ${osName} ${osRelease} (${osArch}) |
 | CPU | ${cpuModel} |
 | Cores | ${cpuCores} |
-| Memory | ${totalMemoryGB} GB |`;
+| Memory | ${totalMemoryGB} GB |
+| Bun | ${metadata.bun} |
+| Run started (UTC) | ${metadata.startedAt} |
+
+Parser versions: ${["@babel/parser", "@swc-next/parser", "@swc/core", "acorn", "oxc-parser", "yuku-parser"].map((name) => `\`${name}@${metadata.packages[name]}\``).join("; ")}.
+
+Run parameters, installed package versions, fixture revision and SHA-256 hashes are saved in [result/metadata.json](result/metadata.json).`;
 }
 
 function generateRunSection(): string {
@@ -377,13 +378,20 @@ cd ecmascript-parser-benchmark-js
 2. Install dependencies:
 
 \`\`\`bash
-bun install
+bun install --frozen-lockfile
 \`\`\`
 
 3. Download the benchmark files:
 
 \`\`\`bash
 bun load-files
+\`\`\`
+
+The downloader follows the fixture repository's HEAD. To reproduce the inputs measured here:
+
+\`\`\`bash
+git -C files fetch --depth 1 origin ${metadata.fixturesCommit}
+git -C files checkout --detach ${metadata.fixturesCommit}
 \`\`\`
 
 4. Run benchmarks:
