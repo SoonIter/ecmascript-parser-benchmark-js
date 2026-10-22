@@ -39,7 +39,7 @@ A high-performance & spec-compliant JavaScript/TypeScript compiler written in Zi
 
 **File size:** 7.83 MB
 
-![Bar chart comparing npm parser speeds for typescript.js](charts/typescript.png)
+![Bar chart comparing npm parser speeds for typescript.js](charts/typescript.svg)
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
@@ -53,7 +53,7 @@ A high-performance & spec-compliant JavaScript/TypeScript compiler written in Zi
 
 **File size:** 2.95 MB
 
-![Bar chart comparing npm parser speeds for checker.ts](charts/checker.png)
+![Bar chart comparing npm parser speeds for checker.ts](charts/checker.svg)
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
@@ -67,7 +67,7 @@ A high-performance & spec-compliant JavaScript/TypeScript compiler written in Zi
 
 **File size:** 2.24 MB
 
-![Bar chart comparing npm parser speeds for lib.dom.d.ts](charts/lib_dom.png)
+![Bar chart comparing npm parser speeds for lib.dom.d.ts](charts/lib_dom.svg)
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
@@ -81,7 +81,7 @@ A high-performance & spec-compliant JavaScript/TypeScript compiler written in Zi
 
 **File size:** 0.07 MB
 
-![Bar chart comparing npm parser speeds for react.js](charts/react.png)
+![Bar chart comparing npm parser speeds for react.js](charts/react.svg)
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|

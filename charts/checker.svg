@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="112" viewBox="0 0 640 112">
+  <style>
+    text { font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; fill: #848d97; dominant-baseline: central; font-variant-numeric: tabular-nums }
+    .ratio { font-size: 12px; fill: #fff }
+  </style>
+  <text x="86" y="11" text-anchor="end">Yuku</text>
+  <rect x="96" y="0" width="54" height="22" rx="4" fill="#FF6B35"/>
+  <text x="158" y="11">14.06 ms</text>
+  <text x="86" y="41" text-anchor="end">Oxc</text>
+  <rect x="96" y="30" width="237" height="22" rx="4" fill="#F72585"/>
+  <text x="341" y="41">62.04 ms</text>
+  <text class="ratio" x="325" y="41" text-anchor="end">4.41×</text>
+  <text x="86" y="71" text-anchor="end">Babel</text>
+  <rect x="96" y="60" width="256" height="22" rx="4" fill="#7209B7"/>
+  <text x="360" y="71">66.97 ms</text>
+  <text class="ratio" x="344" y="71" text-anchor="end">4.76×</text>
+  <text x="86" y="101" text-anchor="end">SWC</text>
+  <rect x="96" y="90" width="464" height="22" rx="4" fill="#3A86FF"/>
+  <text x="568" y="101">121.39 ms</text>
+  <text class="ratio" x="552" y="101" text-anchor="end">8.63×</text>
+</svg>

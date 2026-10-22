@@ -1,8 +1,6 @@
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { arch, cpus, platform, release, totalmem } from "node:os";
 import { join } from "node:path";
-import type { ChartConfiguration } from "chart.js";
-import { ChartJSNodeCanvas } from "chartjs-node-canvas";
 
 const FILES_SOURCE_URL_PREFIX =
   "https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/refs/heads/main";
@@ -105,10 +103,6 @@ function formatTime(ms: number): string {
   return `${ms.toFixed(2)} ms`;
 }
 
-function formatThroughput(bytes: number, ms: number): string {
-  return `${(bytes / (1024 * 1024) / (ms / 1000)).toFixed(1)} MB/s`;
-}
-
 function formatOps(medianMs: number): string {
   const ops = 1000 / medianMs;
   return `${ops.toFixed(2)} ops/s`;
@@ -145,115 +139,44 @@ function getParserEntries(data: FileResult): ParserEntry[] {
   return entries;
 }
 
-async function generateChart(
-  entries: ParserEntry[],
-  chartName: string,
-  fileSize: number,
-): Promise<string> {
+async function generateChart(entries: ParserEntry[], chartName: string): Promise<string> {
   const data = entries.filter((e) => e.result != null);
   if (data.length === 0) return "";
 
-  const labels = data.map((e) => e.name);
-  const medianData = data.map((e) => e.result!.median);
-  const colors = data.map((e) => CHART_COLORS[e.key] ?? "#888888");
-
-  const maxTime = Math.max(...medianData);
-  const rawStep = maxTime / 4;
-  const magnitude = 10 ** Math.floor(Math.log10(rawStep));
-  const step = [1, 2, 2.5, 5, 10].map((s) => s * magnitude).find((s) => s >= rawStep)!;
-  const chartMax = Math.ceil(maxTime / step) * step;
-
-  const dpr = 3;
-  const chartWidth = 500;
-  const chartHeight = data.length * 24 + 28;
-
-  const chartJSNodeCanvas = new ChartJSNodeCanvas({
-    width: chartWidth * dpr,
-    height: chartHeight * dpr,
+  const width = 640;
+  const barX = 96;
+  const fastest = Math.min(...data.map((e) => e.result!.median));
+  const slowest = Math.max(...data.map((e) => e.result!.median));
+  const rows = data.map(({ key, name, result }, index) => {
+    const { median } = result!;
+    const y = index * 30;
+    const middle = y + 11;
+    const barEnd = barX + Math.round((median / slowest) * (width - barX - 80));
+    const row = [
+      `<text x="${barX - 10}" y="${middle}" text-anchor="end">${name}</text>`,
+      `<rect x="${barX}" y="${y}" width="${barEnd - barX}" height="22" rx="4" fill="${CHART_COLORS[key]}"/>`,
+      `<text x="${barEnd + 8}" y="${middle}">${formatTime(median)}</text>`,
+    ];
+    if (median !== fastest) {
+      const ratio = `${(median / fastest).toFixed(2)}×`;
+      row.push(`<text class="ratio" x="${barEnd - 8}" y="${middle}" text-anchor="end">${ratio}</text>`);
+    }
+    return row.join("\n  ");
   });
 
-  const configuration: ChartConfiguration = {
-    type: "bar",
-    data: {
-      labels,
-      datasets: [
-        {
-          data: medianData,
-          backgroundColor: colors,
-          borderWidth: 0,
-          borderRadius: 0,
-          barPercentage: 0.75,
-          categoryPercentage: 0.92,
-        },
-      ],
-    },
-    options: {
-      indexAxis: "y",
-      responsive: false,
-      devicePixelRatio: 1,
-      layout: {
-        padding: { right: 65 * dpr, top: 2 * dpr, bottom: 0 },
-      },
-      plugins: {
-        legend: { display: false },
-        title: { display: false },
-      },
-      scales: {
-        x: { display: false, beginAtZero: true, max: chartMax },
-        y: {
-          grid: { display: false },
-          border: { display: false },
-          ticks: {
-            color: "#CAC1B0",
-            font: { size: 9 * dpr },
-            padding: 3 * dpr,
-          },
-        },
-      },
-    },
-    plugins: [
-      {
-        id: "value-labels",
-        afterDatasetsDraw(chart) {
-          const ctx = chart.ctx;
-          const meta = chart.getDatasetMeta(0);
-          const dataset = chart.data.datasets[0];
-          for (let i = 0; i < meta.data.length; i++) {
-            const bar = meta.data[i];
-            const value = dataset.data[i] as number;
-            ctx.save();
-            ctx.font = `${9 * dpr}px sans-serif`;
-            ctx.textBaseline = "middle";
-            ctx.fillStyle = "#CAC1B0";
-            ctx.textAlign = "left";
-            const msLabel = `${value.toFixed(2)}ms`;
-            ctx.fillText(msLabel, bar.x + 8 * dpr, bar.y);
-            const throughput = formatThroughput(fileSize, value);
-            const barWidth = bar.x - (bar as unknown as { base: number }).base;
-            ctx.font = `${8 * dpr}px sans-serif`;
-            const inset = Math.min(8 * dpr, (barWidth - ctx.measureText(throughput).width) / 2);
-            if (inset >= 2 * dpr) {
-              ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
-              ctx.textAlign = "right";
-              ctx.fillText(throughput, bar.x - inset, bar.y);
-            } else {
-              ctx.font = `${9 * dpr}px sans-serif`;
-              const msWidth = ctx.measureText(msLabel).width;
-              ctx.fillText(`· ${throughput}`, bar.x + 8 * dpr + msWidth + 4 * dpr, bar.y);
-            }
-            ctx.restore();
-          }
-        },
-      },
-    ],
-  };
+  const height = data.length * 30 - 8;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <style>
+    text { font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; fill: #848d97; dominant-baseline: central; font-variant-numeric: tabular-nums }
+    .ratio { font-size: 12px; fill: #fff }
+  </style>
+  ${rows.join("\n  ")}
+</svg>
+`;
 
-  const imageBuffer = await chartJSNodeCanvas.renderToBuffer(configuration);
-  const chartPath = join(process.cwd(), "charts", `${chartName}.png`);
   await mkdir(join(process.cwd(), "charts"), { recursive: true });
-  await writeFile(chartPath, imageBuffer);
-
-  return `charts/${chartName}.png`;
+  await writeFile(join(process.cwd(), "charts", `${chartName}.svg`), svg);
+  return `charts/${chartName}.svg`;
 }
 
 function generateTable(entries: ParserEntry[]): string {
@@ -304,7 +227,7 @@ async function generateBenchmarksSection(): Promise<string> {
     lines.push(`**File size:** ${formatBytes(fileSize)}`);
     lines.push("");
 
-    const chartPath = await generateChart(entries, fileKey, fileSize);
+    const chartPath = await generateChart(entries, fileKey);
     if (chartPath) {
       lines.push(`![Bar chart comparing npm parser speeds for ${fileName}](${chartPath})`);
       lines.push("");
