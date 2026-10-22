@@ -139,12 +139,18 @@ function getParserEntries(data: FileResult): ParserEntry[] {
   return entries;
 }
 
+function textWidth(text: string): number {
+  let em = 0;
+  for (const c of text) em += /[fijlrt\-. ]/.test(c) ? 0.35 : /[A-Zmw]/.test(c) ? 0.75 : 0.58;
+  return Math.ceil(em * 13);
+}
+
 async function generateChart(entries: ParserEntry[], chartName: string): Promise<string> {
   const data = entries.filter((e) => e.result != null);
   if (data.length === 0) return "";
 
   const width = 640;
-  const barX = 96;
+  const barX = Math.max(...data.map((e) => textWidth(e.name))) + 10;
   const fastest = Math.min(...data.map((e) => e.result!.median));
   const slowest = Math.max(...data.map((e) => e.result!.median));
   const rows = data.map(({ key, name, result }, index) => {
