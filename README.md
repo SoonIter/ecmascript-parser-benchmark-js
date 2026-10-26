@@ -47,12 +47,12 @@ A high-performance & spec-compliant JavaScript/TypeScript compiler written in Zi
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
-| **SWC Next** | **33.66 ms** | **±2.19%** | **35.83 ms** | **28.72 ms** | **103.19 ms** | **29.71 ops/s** | **baseline** |
-| Yuku | 37.07 ms | ±1.27% | 39.00 ms | 33.84 ms | 67.26 ms | 26.98 ops/s | 1.10× slower |
-| Acorn | 110.06 ms | ±2.76% | 112.55 ms | 95.56 ms | 223.08 ms | 9.09 ops/s | 3.27× slower |
-| Babel | 132.13 ms | ±2.44% | 132.93 ms | 106.42 ms | 178.68 ms | 7.57 ops/s | 3.92× slower |
-| Oxc | 175.09 ms | ±1.81% | 179.45 ms | 167.31 ms | 232.86 ms | 5.71 ops/s | 5.20× slower |
-| SWC | 346.83 ms | ±3.23% | 355.65 ms | 310.32 ms | 618.19 ms | 2.88 ops/s | 10.30× slower |
+| **SWC Next** | **32.11 ms** | **±0.67%** | **31.96 ms** | **28.13 ms** | **76.64 ms** | **31.14 ops/s** | **baseline** |
+| Yuku | 36.94 ms | ±1.07% | 38.19 ms | 33.45 ms | 62.96 ms | 27.07 ops/s | 1.15× slower |
+| Acorn | 115.41 ms | ±1.27% | 115.33 ms | 97.18 ms | 186.00 ms | 8.66 ops/s | 3.59× slower |
+| Babel | 134.79 ms | ±2.22% | 133.78 ms | 109.76 ms | 1065.82 ms | 7.42 ops/s | 4.20× slower |
+| Oxc | 186.55 ms | ±11.72% | 206.97 ms | 172.45 ms | 1555.67 ms | 5.36 ops/s | 5.81× slower |
+| SWC | 352.55 ms | ±26.86% | 493.61 ms | 327.28 ms | 6303.19 ms | 2.84 ops/s | 10.98× slower |
 
 ### [checker.ts](https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/refs/heads/main/checker.ts)
 
@@ -62,11 +62,11 @@ A high-performance & spec-compliant JavaScript/TypeScript compiler written in Zi
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
-| **SWC Next** | **11.77 ms** | **±0.96%** | **12.33 ms** | **10.74 ms** | **68.92 ms** | **84.95 ops/s** | **baseline** |
-| Yuku | 11.91 ms | ±0.95% | 12.51 ms | 10.95 ms | 33.59 ms | 83.99 ops/s | 1.01× slower |
-| Oxc | 54.39 ms | ±0.91% | 55.08 ms | 50.89 ms | 89.84 ms | 18.38 ops/s | 4.62× slower |
-| Babel | 55.47 ms | ±1.92% | 56.65 ms | 43.04 ms | 107.29 ms | 18.03 ops/s | 4.71× slower |
-| SWC | 105.71 ms | ±1.07% | 107.18 ms | 100.50 ms | 171.18 ms | 9.46 ops/s | 8.98× slower |
+| **Yuku** | **12.27 ms** | **±0.92%** | **12.75 ms** | **10.86 ms** | **20.71 ms** | **81.53 ops/s** | **baseline** |
+| SWC Next | 12.41 ms | ±0.82% | 12.67 ms | 10.84 ms | 99.33 ms | 80.61 ops/s | 1.01× slower |
+| Oxc | 53.58 ms | ±0.61% | 54.13 ms | 50.89 ms | 70.16 ms | 18.66 ops/s | 4.37× slower |
+| Babel | 56.01 ms | ±1.41% | 56.13 ms | 43.75 ms | 85.09 ms | 17.85 ops/s | 4.57× slower |
+| SWC | 108.28 ms | ±1.18% | 109.56 ms | 100.89 ms | 152.98 ms | 9.24 ops/s | 8.83× slower |
 | Acorn | Failed to parse | - | - | - | - | - | - |
 
 ### [lib.dom.d.ts](https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/refs/heads/main/lib.dom.d.ts)
@@ -77,11 +77,11 @@ A high-performance & spec-compliant JavaScript/TypeScript compiler written in Zi
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
-| **Yuku** | **4.57 ms** | **±0.93%** | **5.07 ms** | **4.11 ms** | **14.53 ms** | **218.88 ops/s** | **baseline** |
-| SWC Next | 5.05 ms | ±0.88% | 5.20 ms | 3.97 ms | 71.37 ms | 197.83 ops/s | 1.11× slower |
-| Oxc | 20.39 ms | ±1.00% | 21.03 ms | 18.90 ms | 65.72 ms | 49.05 ops/s | 4.46× slower |
-| Babel | 28.44 ms | ±1.04% | 28.60 ms | 23.34 ms | 49.57 ms | 35.16 ops/s | 6.22× slower |
-| SWC | 42.75 ms | ±0.57% | 43.46 ms | 41.26 ms | 55.12 ms | 23.39 ops/s | 9.36× slower |
+| **Yuku** | **5.06 ms** | **±0.93%** | **5.32 ms** | **4.07 ms** | **40.56 ms** | **197.77 ops/s** | **baseline** |
+| SWC Next | 5.20 ms | ±0.98% | 5.35 ms | 3.99 ms | 57.95 ms | 192.41 ops/s | 1.03× slower |
+| Oxc | 19.97 ms | ±0.45% | 20.19 ms | 18.73 ms | 30.31 ms | 50.08 ops/s | 3.95× slower |
+| Babel | 28.64 ms | ±1.07% | 29.18 ms | 23.84 ms | 64.87 ms | 34.92 ops/s | 5.66× slower |
+| SWC | 44.83 ms | ±0.71% | 45.15 ms | 41.20 ms | 132.27 ms | 22.31 ops/s | 8.87× slower |
 | Acorn | Failed to parse | - | - | - | - | - | - |
 
 ### [react.js](https://raw.githubusercontent.com/yuku-toolchain/parser-benchmark-files/refs/heads/main/react.js)
@@ -92,12 +92,12 @@ A high-performance & spec-compliant JavaScript/TypeScript compiler written in Zi
 
 | Parser | Median | RME | Mean | Min | Max | Ops/sec | Relative |
 |--------|--------|-----|------|-----|-----|---------|----------|
-| **SWC Next** | **0.19 ms** | **±0.93%** | **0.26 ms** | **0.16 ms** | **47.59 ms** | **5349.98 ops/s** | **baseline** |
-| Yuku | 0.20 ms | ±0.62% | 0.24 ms | 0.18 ms | 5.15 ms | 5077.22 ops/s | 1.05× slower |
-| Acorn | 0.67 ms | ±0.48% | 0.75 ms | 0.58 ms | 7.19 ms | 1496.45 ops/s | 3.58× slower |
-| Babel | 0.88 ms | ±0.82% | 1.04 ms | 0.67 ms | 7.05 ms | 1130.53 ops/s | 4.73× slower |
-| Oxc | 0.95 ms | ±0.38% | 1.02 ms | 0.86 ms | 6.57 ms | 1050.44 ops/s | 5.09× slower |
-| SWC | 1.95 ms | ±0.43% | 2.07 ms | 1.78 ms | 6.92 ms | 512.51 ops/s | 10.44× slower |
+| **SWC Next** | **0.18 ms** | **±0.72%** | **0.24 ms** | **0.16 ms** | **5.35 ms** | **5476.93 ops/s** | **baseline** |
+| Yuku | 0.21 ms | ±0.88% | 0.28 ms | 0.19 ms | 17.95 ms | 4794.25 ops/s | 1.14× slower |
+| Acorn | 0.67 ms | ±0.48% | 0.74 ms | 0.59 ms | 10.78 ms | 1495.70 ops/s | 3.66× slower |
+| Oxc | 0.97 ms | ±0.47% | 1.07 ms | 0.89 ms | 5.43 ms | 1027.75 ops/s | 5.33× slower |
+| Babel | 0.99 ms | ±0.94% | 1.18 ms | 0.68 ms | 8.37 ms | 1006.42 ops/s | 5.44× slower |
+| SWC | 1.89 ms | ±0.72% | 2.05 ms | 1.79 ms | 33.18 ms | 528.55 ops/s | 10.36× slower |
 
 ## Run Benchmarks
 
@@ -142,7 +142,7 @@ Each parser is benchmarked using [Tinybench](https://github.com/tinylibs/tinyben
 
 To keep results stable and fair, every parser × file combination runs in its own freshly spawned process, so JIT state and GC pressure from one parser never affect another. Each combination is benchmarked in multiple independent runs (3 by default), and the reported median is the median across those runs, a statistic that is robust to GC pauses, OS scheduling blips, and other outliers. The RME column shows the relative margin of error (99% confidence) within a run. Differences between parsers smaller than their combined margins should be treated as noise.
 
-Oxc, SWC, and SWC Next run through their NAPI bindings; Yuku uses its published WebAssembly backend. Measured time includes obtaining the complete JavaScript AST. SWC Next reads `result.program` to include AST decoding. Pure JS parsers (Acorn, Babel) run directly in the JavaScript runtime.
+Oxc, SWC, SWC Next, and Yuku run through their published Node-API bindings on this platform. Yuku 0.24.0 selects its native addon by default here; its WebAssembly fallback is not measured. Measured time includes obtaining the complete JavaScript AST. SWC Next reads `result.program` to include AST decoding. Pure JS parsers (Acorn, Babel) run directly in the JavaScript runtime.
 
 `lib.dom.d.ts` is a global declaration script with no imports or exports. SWC parses it as a script rather than a module, because its npm binding otherwise rejects the file's `...arguments` parameter names under module strict mode.
 

@@ -3,23 +3,23 @@
     text { font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif; fill: #848d97; dominant-baseline: central; font-variant-numeric: tabular-nums }
     .ratio { font-size: 12px; fill: #fff }
   </style>
-  <text x="64" y="11" text-anchor="end">SWC Next</text>
-  <rect x="74" y="0" width="54" height="22" rx="4" fill="#2DBD85"/>
-  <text x="136" y="11">11.77 ms</text>
-  <text x="64" y="41" text-anchor="end">Yuku</text>
-  <rect x="74" y="30" width="55" height="22" rx="4" fill="#FF6B35"/>
-  <text x="137" y="41">11.91 ms</text>
-  <text class="ratio" x="121" y="41" text-anchor="end">1.01×</text>
+  <text x="64" y="11" text-anchor="end">Yuku</text>
+  <rect x="74" y="0" width="55" height="22" rx="4" fill="#FF6B35"/>
+  <text x="137" y="11">12.27 ms</text>
+  <text x="64" y="41" text-anchor="end">SWC Next</text>
+  <rect x="74" y="30" width="56" height="22" rx="4" fill="#2DBD85"/>
+  <text x="138" y="41">12.41 ms</text>
+  <text class="ratio" x="122" y="41" text-anchor="end">1.01×</text>
   <text x="64" y="71" text-anchor="end">Oxc</text>
-  <rect x="74" y="60" width="250" height="22" rx="4" fill="#F72585"/>
-  <text x="332" y="71">54.39 ms</text>
-  <text class="ratio" x="316" y="71" text-anchor="end">4.62×</text>
+  <rect x="74" y="60" width="241" height="22" rx="4" fill="#F72585"/>
+  <text x="323" y="71">53.58 ms</text>
+  <text class="ratio" x="307" y="71" text-anchor="end">4.37×</text>
   <text x="64" y="101" text-anchor="end">Babel</text>
-  <rect x="74" y="90" width="255" height="22" rx="4" fill="#7209B7"/>
-  <text x="337" y="101">55.47 ms</text>
-  <text class="ratio" x="321" y="101" text-anchor="end">4.71×</text>
+  <rect x="74" y="90" width="251" height="22" rx="4" fill="#7209B7"/>
+  <text x="333" y="101">56.01 ms</text>
+  <text class="ratio" x="317" y="101" text-anchor="end">4.57×</text>
   <text x="64" y="131" text-anchor="end">SWC</text>
   <rect x="74" y="120" width="486" height="22" rx="4" fill="#3A86FF"/>
-  <text x="568" y="131">105.71 ms</text>
-  <text class="ratio" x="552" y="131" text-anchor="end">8.98×</text>
+  <text x="568" y="131">108.28 ms</text>
+  <text class="ratio" x="552" y="131" text-anchor="end">8.83×</text>
 </svg>

@@ -20,10 +20,10 @@
     "acorn": "^8.19.0",
     "oxc-parser": "^0.155.0",
     "tinybench": "^6.2.2",
-    "yuku": "^0.23.0"
+    "yuku": "^0.24.0"
   },
   "devDependencies": {
-    "@types/bun": "^1.4.3",
+    "@types/bun": "^1.4.4",
     "@types/node": "^26.6.5",
     "@typescript/native-preview": "^7.0.0-dev.20260707.2"
   },
