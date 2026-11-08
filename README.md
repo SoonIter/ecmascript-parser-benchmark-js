@@ -103,7 +103,7 @@ A high-performance & spec-compliant JavaScript/TypeScript compiler written in Zi
 
 ### Prerequisites
 
-- [Bun](https://bun.sh/) - JavaScript runtime and package manager
+- [Bun 1.4.4 or newer](https://bun.sh/)
 
 ### Steps
 
@@ -138,9 +138,13 @@ Benchmark duration is configurable via the environment variables `BENCH_TIME` (t
 
 ## Methodology
 
-Each parser is benchmarked using [Tinybench](https://github.com/tinylibs/tinybench) with warmup iterations followed by multiple timed runs. Each run measures the time to parse the source text into an AST. Source files are read from disk once and kept in memory for all iterations.
+Each parser is benchmarked using [Tinybench](https://github.com/tinylibs/tinybench) with warmup iterations followed by multiple timed runs. Each run measures the time to parse the source text into an AST. Source files are read from disk once and kept in memory for all iterations. Parser preflight and timed child processes use the same runtime as the benchmark harness.
 
 To keep results stable and fair, every parser × file combination runs in its own freshly spawned process, so JIT state and GC pressure from one parser never affect another. Each combination is benchmarked in multiple independent runs (3 by default), and the reported median is the median across those runs, a statistic that is robust to GC pauses, OS scheduling blips, and other outliers. The RME column shows the relative margin of error (99% confidence) within a run. Differences between parsers smaller than their combined margins should be treated as noise.
+
+Before timing, the benchmark generates Oxc AST baselines in the ignored `.cache/ecmascript-parser-benchmark-js/ast.json` file. Each parser must parse the file without diagnostics and match the baseline's normalized AST, node counts, types, values, operators, and source spans; parentheses are preserved. Flat comments are compared when both parsers expose them. Parser order rotates between runs.
+
+The root program span covers the full file. For typed identifiers, preflight compares the identifier and annotation spans separately when source text confirms the boundary. It checks template-literal spans against delimiters, expression boundaries, and raw text; when those boundaries cannot be verified, it compares the parser-reported span.
 
 Native parsers (Oxc, SWC, SWC Next, Yuku) run through their respective bindings, so measured time includes the binding overhead. Pure JS parsers (Acorn, Babel) run directly in the JavaScript runtime.
 
@@ -150,7 +154,7 @@ Native parsers (Oxc, SWC, SWC Next, Yuku) run through their respective bindings,
 
 **What about Oxc's `experimentalRawTransfer`?** Oxc also has a hidden experimental path that removes the JSON step entirely. It is not part of Oxc's documented parser options, but when the flag is passed, Rust parses directly into a huge `ArrayBuffer` shared with JavaScript, and generated JS code deserializes AST nodes straight out of that memory. It is genuinely clever engineering, and with it enabled Oxc's end-to-end numbers land much closer to Yuku's, since the two pipelines become architecturally the same (binary buffer in, ESTree objects out).
 
-It is not part of the results above for a simple reason. This benchmark measures each parser's default, documented, stable API, the code path every user gets from `npm install`. Raw transfer today is an undocumented flag that is none of those things, and it cannot run here at all.
+It is not part of the results above for a simple reason. This benchmark measures each parser's default, documented, stable API, the code path every user gets from `bun install`. Raw transfer today is an undocumented flag that is none of those things.
 
 - **It does not work on Bun**, which this benchmark runs on. `oxc-parser`'s own `rawTransferSupported()` check returns `false` on Bun, and on Node < 22 and Deno < 2, because the design requires allocating an `ArrayBuffer` larger than 4 GiB. Enabling the option in this harness would simply throw.
 - **It needs gigabytes of reserved memory per parse.** The trick that makes it fast is that the Rust arena is a fixed 2 GiB block aligned to a 4 GiB boundary, so 64-bit Rust pointers can be read from JavaScript as 32-bit buffer offsets. Achieving that alignment means reserving ~6 GiB of address space per buffer. Most of it stays virtual until touched, but every concurrent parse still needs its own dedicated 2 GiB arena, source and AST together must fit inside that block, and only 64-bit little-endian platforms are supported.
